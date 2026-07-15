@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.pyo
+.astify_semantic.json
+.embedgraph_semantic.json
+*.egg-info/
+dist/
+build/
+.env
+venv/
+.venv/
