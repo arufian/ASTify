@@ -120,7 +120,7 @@ def main():
     p.add_argument('-q', '--quiet', action='store_true')
 
     # extract
-    p = sub.add_parser('extract', help='Extract semantic graph from documents')
+    p = sub.add_parser('extract', help='Extract semantic graph from readable files')
     p.add_argument('directory', nargs='?', default='.',
                    help='Directory to scan')
     p.add_argument('-m', '--model', default='all-MiniLM-L6-v2',

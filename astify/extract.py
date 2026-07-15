@@ -1,25 +1,12 @@
-import os
 import re
-import json
-import hashlib
+import codecs
 from pathlib import Path
-from collections import Counter, defaultdict
-from typing import Optional
+from collections import defaultdict
 
 import numpy as np
 import yaml
 
-
-TEXT_EXTS = {'.md', '.txt', '.rst', '.adoc', '.org', '.tex', '.wiki', '.asciidoc'}
-DOC_EXTS = TEXT_EXTS | {'.pdf'}
-CODE_EXTS = {
-    '.py', '.js', '.ts', '.jsx', '.tsx', '.go', '.rs', '.java', '.kt',
-    '.c', '.cpp', '.h', '.hpp', '.rb', '.swift', '.scala', '.cs', '.php',
-    '.sh', '.bash', '.zsh', '.sql', '.r', '.jl', '.lua', '.pl', '.pm',
-    '.dart', '.ex', '.exs', '.clj', '.cljs', '.elm', '.hs', '.ml',
-    '.vue', '.svelte', '.astro', '.sol', '.move', '.proto', '.graphql',
-    '.yml', '.yaml', '.toml', '.json', '.xml', '.cfg', '.ini', '.conf',
-}
+from astify.detect import CODE_EXTS, CODE_FILENAMES
 
 
 def read_frontmatter(text: str) -> tuple[dict, str]:
@@ -50,8 +37,13 @@ def read_file_text(filepath: Path) -> str:
         except Exception:
             return ''
     try:
-        return filepath.read_text(encoding='utf-8', errors='replace')
-    except Exception:
+        data = filepath.read_bytes()
+        if data.startswith((codecs.BOM_UTF32_LE, codecs.BOM_UTF32_BE)):
+            return data.decode('utf-32')
+        if data.startswith((codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE)):
+            return data.decode('utf-16')
+        return data.decode('utf-8-sig', errors='replace')
+    except OSError:
         return ''
 
 
@@ -75,9 +67,9 @@ def stem_from_path(filepath: Path, root: Path) -> str:
 
 
 def detect_files(root: Path) -> list[Path]:
-    """Find document files (non-code, non-binary)."""
-    from astify.detect import detect_files as _detect
-    return _detect(root, DOC_EXTS)
+    """Find all readable text and PDF files, regardless of extension."""
+    from astify.detect import detect_content_files
+    return detect_content_files(root)
 
 
 def chunk_text(text: str, max_chars: int = 8000) -> list[str]:
@@ -166,14 +158,19 @@ def build_nodes(
         stem = stem_from_path(fp, root)
         fm = frontmatter_by_file.get(path_str, {})
 
-        # File-level document node
+        # File-level source node
         file_node_id = stem
         if file_node_id not in seen_ids:
             seen_ids.add(file_node_id)
             nodes.append({
                 'id': file_node_id,
-                'label': fp.stem,
-                'file_type': 'document',
+                'label': fp.name,
+                'file_type': (
+                    'code'
+                    if (fp.suffix.lower() in CODE_EXTS
+                        or fp.name.lower() in CODE_FILENAMES)
+                    else 'document'
+                ),
                 'source_file': rel_str,
                 'source_location': None,
                 'source_url': fm.get('source_url'),
@@ -406,7 +403,7 @@ def run_extraction(
     verbose: bool = True,
 ) -> dict:
     """
-    Main pipeline: extract ASTify-compatible semantic graph from documents.
+    Main pipeline: extract ASTify-compatible semantic graph from readable files.
 
     Returns dict with 'nodes', 'edges', 'hyperedges', 'input_tokens', 'output_tokens'.
     """
@@ -420,12 +417,12 @@ def run_extraction(
     files = detect_files(root)
     if not files:
         if verbose:
-            print('No document files found.')
+            print('No readable text or PDF files found.')
         return {'nodes': [], 'edges': [], 'hyperedges': [],
                 'input_tokens': 0, 'output_tokens': 0}
 
     if verbose:
-        print(f'Found {len(files)} document files')
+        print(f'Found {len(files)} readable files')
         for f in files:
             print(f'  {f.relative_to(root)}')
 

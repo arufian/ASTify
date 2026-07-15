@@ -1,11 +1,11 @@
 ---
 name: ASTify
-description: "MUST use BEFORE any codebase exploration (Grep/Glob/Read/Explore) when astify-out/ exists — for questions AND for edit/fix/feature/refactor tasks that need locating or understanding code first. Also for any question about a codebase, its architecture, file relationships, or project content. Turns documents, markdown, papers, and PDFs into a queryable knowledge graph using local embeddings (zero AI tokens). Supports extract, build, query, path, and explain."
+description: "MUST use BEFORE any codebase exploration (Grep/Glob/Read/Explore) when astify-out/ exists — for questions AND for edit/fix/feature/refactor tasks that need locating or understanding code first. Also for any question about a codebase, its architecture, file relationships, or project content. Turns source code, metadata, config, documents, and PDFs into a queryable knowledge graph using local embeddings (zero AI tokens). Supports extract, build, query, path, and explain."
 ---
 
 # /astify
 
-Turn any folder of documents into a navigable knowledge graph using local embeddings — no API keys, no token costs. Produces graph.json, GRAPH_REPORT.md, and interactive HTML.
+Turn any folder of readable files into a navigable knowledge graph using local embeddings — no API keys, no token costs. Produces graph.json, GRAPH_REPORT.md, and interactive HTML.
 
 ## Usage
 
@@ -22,7 +22,7 @@ Turn any folder of documents into a navigable knowledge graph using local embedd
 
 ## What ASTify is for
 
-Drop any folder of docs, markdown, papers, or PDFs into ASTify and get a queryable knowledge graph. Persistent across sessions. Community detection surfaces cross-document connections. Zero AI tokens — all local CPU computation.
+Drop any folder of source code, XML, YAML, metadata, docs, or PDFs into ASTify and get a queryable knowledge graph. Unknown extensions and extensionless readable text are supported. Persistent across sessions. Community detection surfaces cross-file connections. Zero AI tokens — all local CPU computation.
 
 ## What You Must Do When Invoked
 
@@ -63,7 +63,7 @@ Corpus: N files · ~M words
   papers:   N files
 ```
 
-If no document files found: "No supported files found in [path]." and stop.
+If no readable files found: "No supported files found in [path]." and stop.
 
 ### Step 3 — Extract entities and relationships
 

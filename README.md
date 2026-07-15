@@ -42,7 +42,7 @@ astify explain "AuthService"
 ## How It Works
 
 ```
-Documents (md, txt, pdf, etc.)
+Readable files (source code, XML, YAML, docs, PDFs, any text extension)
     │
     ├─► sentence-transformers → embeddings → cosine similarity edges
     ├─► KeyBERT → keyword extraction → concept nodes
@@ -54,6 +54,12 @@ Then: NetworkX graph → Louvain community detection → god nodes → report �
 ```
 
 ## Output
+
+ASTify scans file content, not only extension allowlists. Known programming
+languages and metadata formats are classified as code; unfamiliar extensions
+and extensionless files are included when their content is readable text.
+Binary files, hidden paths, dependencies, build outputs, and ASTify/Graphify
+output directories are skipped.
 
 ```
 astify-out/
