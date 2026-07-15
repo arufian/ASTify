@@ -1,6 +1,6 @@
 ---
 name: ASTify
-description: "Use for any question about a codebase, its architecture, file relationships, or project content — especially when astify-out/ exists. Turns documents, markdown, papers, and PDFs into a queryable knowledge graph using local embeddings (zero AI tokens). Supports extract, build, query, path, and explain."
+description: "MUST use BEFORE any codebase exploration (Grep/Glob/Read/Explore) when astify-out/ exists — for questions AND for edit/fix/feature/refactor tasks that need locating or understanding code first. Also for any question about a codebase, its architecture, file relationships, or project content. Turns documents, markdown, papers, and PDFs into a queryable knowledge graph using local embeddings (zero AI tokens). Supports extract, build, query, path, and explain."
 ---
 
 # /astify
