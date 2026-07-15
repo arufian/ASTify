@@ -1,7 +1,7 @@
 [project]
-name = "embedgraph"
+name = "astify"
 version = "0.1.0"
-description = "Embedding-based knowledge graph extraction — zero AI tokens"
+description = "ASTify — embedding-based knowledge graph extraction, zero AI tokens"
 requires-python = ">=3.9"
 dependencies = [
     "sentence-transformers>=2.2.0",
@@ -12,11 +12,16 @@ dependencies = [
     "hnswlib>=0.7.0",
     "PyYAML>=6.0",
     "numpy>=1.24.0",
+    "networkx>=3.0",
+    "pyvis>=0.3.0",
 ]
 
 [project.scripts]
-embedgraph = "embedgraph.cli:main"
+astify = "astify.cli:main"
 
 [build-system]
 requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["astify*"]

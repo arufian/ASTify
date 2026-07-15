@@ -4,10 +4,10 @@ import sys
 import json
 from pathlib import Path
 
-_parent = Path(__file__).resolve().parent.parent
+_parent = Path(__file__).resolve().parent
 sys.path.insert(0, str(_parent))
 
-from embedgraph.extract import run_extraction
+from astify.extract import run_extraction
 
 
 def _parse_args():
