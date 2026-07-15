@@ -19,24 +19,35 @@ def _parse_args():
     quiet = False
 
     args = sys.argv[1:]
+
+    def _value(i, flag):
+        if i + 1 >= len(args):
+            sys.exit(f'ERROR: {flag} requires a value')
+        return args[i + 1]
+
     i = 0
     while i < len(args):
         if args[i] in ('-m', '--model'):
+            model = _value(i, args[i])
             i += 1
-            model = args[i]
         elif args[i] in ('-t', '--threshold'):
+            try:
+                threshold = float(_value(i, args[i]))
+            except ValueError:
+                sys.exit(f'ERROR: {args[i]} expects a number')
             i += 1
-            threshold = float(args[i])
         elif args[i] in ('-o', '--output'):
+            output = _value(i, args[i])
             i += 1
-            output = args[i]
         elif args[i] == '--astify-path':
+            astify = _value(i, args[i])
             i += 1
-            astify = args[i]
         elif args[i] in ('-q', '--quiet'):
             quiet = True
         elif not args[i].startswith('-'):
             directory = args[i]
+        else:
+            sys.exit(f'ERROR: unknown flag {args[i]}')
         i += 1
 
     return directory, model, threshold, output, astify, quiet

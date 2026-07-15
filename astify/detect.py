@@ -17,15 +17,19 @@ SKIP_PARTS = {'node_modules', '__pycache__', '.git', '.svn', 'venv', '.venv',
 
 
 def detect_files(root: Path, exts: set[str] = DOC_EXTS) -> list[Path]:
+    root = root.resolve()
     files = []
     for path in root.rglob('*'):
         if not path.is_file():
             continue
         if path.suffix.lower() not in exts:
             continue
-        if any(part.startswith('.') and part != '.' for part in path.parts):
+        # only inspect components below root, so a hidden ancestor
+        # directory of root doesn't exclude everything
+        rel_parts = path.relative_to(root).parts
+        if any(part.startswith('.') for part in rel_parts):
             continue
-        if any(s in path.parts for s in SKIP_PARTS):
+        if any(s in rel_parts for s in SKIP_PARTS):
             continue
         files.append(path)
     return sorted(files)

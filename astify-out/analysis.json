@@ -1,0 +1,285 @@
+{
+  "communities": {
+    "0": [
+      "readme_opencode",
+      "readme_authservice",
+      "readme_llm_semantic_extraction",
+      "readme_windows",
+      "readme_edge_type",
+      "readme_gpu",
+      "readme_astify_pipeline",
+      "readme_astify_pipeline_astify",
+      "readme_na",
+      "readme_output_astify_semantic",
+      "readme_tools_astify_pipeline",
+      "readme_extract_astify_build",
+      "readme_keyword",
+      "readme_invoke",
+      "readme_astify_extract_astify",
+      "readme_astify_extract",
+      "readme_mit",
+      "readme_linux",
+      "readme_louvain",
+      "readme_pdf",
+      "readme_claude_code",
+      "readme_tools_astify",
+      "readme_extract_astify",
+      "readme_manual_python_spacy",
+      "readme",
+      "readme_node",
+      "readme_tokens",
+      "readme_knowledge_graph_extraction",
+      "readme_llm"
+    ],
+    "1": [
+      "skill_drop",
+      "skill_navigable_knowledge_graph",
+      "skill_path_concepts_astify",
+      "skill_tokens_astify_path",
+      "readme_cpu",
+      "skill",
+      "skill_path_astify",
+      "skill_authmodule",
+      "skill_documents_navigable_knowledge",
+      "skill_graphify",
+      "readme_ner",
+      "skill_documents_navigable",
+      "skill_networkx",
+      "skill_folder_documents_navigable",
+      "skill_keybert",
+      "readme_keybert",
+      "readme_networkx",
+      "skill_cpu",
+      "readme_jwt",
+      "skill_graph",
+      "skill_pathtodir_astify_graph",
+      "skill_astify",
+      "readme_graphify",
+      "skill_knowledge_graph_persistent",
+      "skill_jwt",
+      "skill_astify_path_pipeline",
+      "skill_ner",
+      "skill_astify_queryable_knowledge",
+      "skill_astify_extract_path"
+    ],
+    "2": [
+      "astifyegginfo_sources_export_py_astify",
+      "astifyegginfo_sources_astify_build_py",
+      "astifyegginfo_sources",
+      "astifyegginfo_sources_build_py_astify",
+      "astifyegginfo_sources_extract_py_astify",
+      "astifyegginfo_sources_py_astify_egg",
+      "astifyegginfo_sources_py_astify_build",
+      "astifyegginfo_sources_init_py_astify",
+      "astifyegginfo_sources_py_astify_extract",
+      "astifyegginfo_sources_astify_init_py",
+      "astifyegginfo_sources_py_astify_cli",
+      "astifyegginfo_sources_astify_export_py",
+      "astifyegginfo_sources_astify_extract_py"
+    ],
+    "3": [
+      "astifyegginfo_dependencylinks"
+    ],
+    "4": [
+      "astifyegginfo_entrypoints"
+    ],
+    "5": [
+      "astifyegginfo_toplevel"
+    ],
+    "6": [
+      "requirements_scikit_learn_pymupdf",
+      "requirements_keybert_scikit_learn",
+      "astifyegginfo_requires_scikit_learn_pymupdf",
+      "requirements",
+      "astifyegginfo_requires_pymupdf1230",
+      "requirements_learn_pymupdf_23",
+      "requirements_scikit",
+      "astifyegginfo_requires_spacy_keybert_scikit",
+      "astifyegginfo_requires_keybert_scikit_learn",
+      "astifyegginfo_requires_pyvis030",
+      "requirements_sentence_transformers",
+      "astifyegginfo_requires_pyyaml_numpy",
+      "requirements_keybert_scikit",
+      "astifyegginfo_requires_hnswlib_pyyaml_numpy",
+      "requirements_keybert080",
+      "astifyegginfo_requires_keybert_scikit",
+      "astifyegginfo_requires_sentence_transformers_spacy",
+      "astifyegginfo_requires_transformers_spacy",
+      "requirements_sentence_transformers_spacy",
+      "astifyegginfo_requires",
+      "requirements_pyyaml_numpy",
+      "astifyegginfo_requires_learn_pymupdf_23",
+      "requirements_pymupdf1230",
+      "astifyegginfo_requires_scikit",
+      "astifyegginfo_requires_scikit_learn",
+      "requirements_spacy_keybert_scikit",
+      "requirements_scikit_learn",
+      "requirements_transformers_spacy",
+      "requirements_hnswlib_pyyaml_numpy",
+      "astifyegginfo_requires_sentence_transformers",
+      "astifyegginfo_requires_keybert080"
+    ]
+  },
+  "cohesion": {
+    "0": 0.069,
+    "1": 0.069,
+    "2": 0.1538,
+    "3": 0.0,
+    "4": 0.0,
+    "5": 0.0,
+    "6": 0.0946
+  },
+  "gods": [
+    {
+      "id": "readme",
+      "label": "README",
+      "degree": 34,
+      "community": 0
+    },
+    {
+      "id": "skill",
+      "label": "SKILL",
+      "degree": 22,
+      "community": 1
+    },
+    {
+      "id": "astifyegginfo_requires",
+      "label": "requires",
+      "degree": 16,
+      "community": 6
+    },
+    {
+      "id": "requirements",
+      "label": "requirements",
+      "degree": 15,
+      "community": 6
+    },
+    {
+      "id": "astifyegginfo_sources",
+      "label": "SOURCES",
+      "degree": 12,
+      "community": 2
+    },
+    {
+      "id": "readme_cpu",
+      "label": "CPU (ORG)",
+      "degree": 2,
+      "community": 1
+    },
+    {
+      "id": "readme_jwt",
+      "label": "JWT (WORK_OF_ART)",
+      "degree": 2,
+      "community": 1
+    },
+    {
+      "id": "readme_ner",
+      "label": "NER (ORG)",
+      "degree": 2,
+      "community": 1
+    },
+    {
+      "id": "readme_networkx",
+      "label": "NetworkX (PERSON)",
+      "degree": 2,
+      "community": 1
+    },
+    {
+      "id": "readme_graphify",
+      "label": "Graphify (PERSON)",
+      "degree": 2,
+      "community": 1
+    }
+  ],
+  "surprises": [
+    {
+      "source": "README",
+      "target": "CPU (ORG)",
+      "betweenness": 0.0275,
+      "source_id": "readme",
+      "target_id": "readme_cpu"
+    },
+    {
+      "source": "README",
+      "target": "JWT (WORK_OF_ART)",
+      "betweenness": 0.0275,
+      "source_id": "readme",
+      "target_id": "readme_jwt"
+    },
+    {
+      "source": "README",
+      "target": "NER (ORG)",
+      "betweenness": 0.0275,
+      "source_id": "readme",
+      "target_id": "readme_ner"
+    },
+    {
+      "source": "README",
+      "target": "NetworkX (PERSON)",
+      "betweenness": 0.0275,
+      "source_id": "readme",
+      "target_id": "readme_networkx"
+    },
+    {
+      "source": "README",
+      "target": "Graphify (PERSON)",
+      "betweenness": 0.0275,
+      "source_id": "readme",
+      "target_id": "readme_graphify"
+    },
+    {
+      "source": "README",
+      "target": "KeyBERT (ORG)",
+      "betweenness": 0.0275,
+      "source_id": "readme",
+      "target_id": "readme_keybert"
+    },
+    {
+      "source": "Graphify (PERSON)",
+      "target": "Graphify (FAC)",
+      "betweenness": 0.0246,
+      "source_id": "readme_graphify",
+      "target_id": "skill_graphify"
+    },
+    {
+      "source": "CPU (ORG)",
+      "target": "CPU (ORG)",
+      "betweenness": 0.0246,
+      "source_id": "readme_cpu",
+      "target_id": "skill_cpu"
+    },
+    {
+      "source": "JWT (WORK_OF_ART)",
+      "target": "JWT (WORK_OF_ART)",
+      "betweenness": 0.0246,
+      "source_id": "readme_jwt",
+      "target_id": "skill_jwt"
+    },
+    {
+      "source": "NER (ORG)",
+      "target": "NER (ORG)",
+      "betweenness": 0.0246,
+      "source_id": "readme_ner",
+      "target_id": "skill_ner"
+    }
+  ],
+  "questions": [
+    "How does README connect to other components?",
+    "What bridges Astify (Org) (Product) and Navigable Path Astify?",
+    "Which concepts are most central to the architecture?"
+  ],
+  "labels": {
+    "0": "Astify (Org) (Product)",
+    "1": "Navigable Path Astify",
+    "2": "Astify Build Extract",
+    "3": "Dependency_Links",
+    "4": "Entry_Points",
+    "5": "Top_Level",
+    "6": "Scikit Learn Keybert"
+  },
+  "num_nodes": 105,
+  "num_edges": 118,
+  "num_communities": 7,
+  "input_tokens": 0,
+  "output_tokens": 0
+}

@@ -76,15 +76,8 @@ def stem_from_path(filepath: Path, root: Path) -> str:
 
 def detect_files(root: Path) -> list[Path]:
     """Find document files (non-code, non-binary)."""
-    files: list[Path] = []
-    for path in root.rglob('*'):
-        if path.is_file() and path.suffix.lower() in DOC_EXTS:
-            if any(part.startswith('.') for part in path.parts):
-                continue
-            if 'node_modules' in path.parts or '__pycache__' in path.parts:
-                continue
-            files.append(path)
-    return sorted(files)
+    from astify.detect import detect_files as _detect
+    return _detect(root, DOC_EXTS)
 
 
 def chunk_text(text: str, max_chars: int = 8000) -> list[str]:
@@ -169,6 +162,7 @@ def build_nodes(
 
     for fp in files:
         path_str = str(fp)
+        rel_str = str(fp.relative_to(root))
         stem = stem_from_path(fp, root)
         fm = frontmatter_by_file.get(path_str, {})
 
@@ -180,7 +174,7 @@ def build_nodes(
                 'id': file_node_id,
                 'label': fp.stem,
                 'file_type': 'document',
-                'source_file': path_str,
+                'source_file': rel_str,
                 'source_location': None,
                 'source_url': fm.get('source_url'),
                 'captured_at': fm.get('captured_at'),
@@ -198,7 +192,7 @@ def build_nodes(
                 'id': node_id,
                 'label': kw,
                 'file_type': 'concept',
-                'source_file': path_str,
+                'source_file': rel_str,
                 'source_location': None,
                 'source_url': fm.get('source_url'),
                 'captured_at': fm.get('captured_at'),
@@ -216,7 +210,7 @@ def build_nodes(
                 'id': node_id,
                 'label': f'{ent_text} ({ent_label})',
                 'file_type': 'concept',
-                'source_file': path_str,
+                'source_file': rel_str,
                 'source_location': None,
                 'source_url': fm.get('source_url'),
                 'captured_at': fm.get('captured_at'),
@@ -234,6 +228,7 @@ def build_edges(
     keywords_by_file: dict[str, list[tuple[str, float]]],
     entities_by_file: dict[str, list[tuple[str, str, float]]],
     texts: dict[str, str],
+    sim_threshold: float = 0.72,
 ) -> list[dict]:
     """Build edges: file→keyword, file→entity, cross-file similarity, co-occurrence."""
     from sklearn.metrics.pairwise import cosine_similarity
@@ -246,6 +241,10 @@ def build_edges(
         if key in edge_keys:
             return
         edge_keys.add(key)
+        try:
+            source_file = str(Path(source_file).relative_to(root))
+        except ValueError:
+            pass
         edges.append({
             'source': src,
             'target': tgt,
@@ -293,7 +292,7 @@ def build_edges(
             for i in range(len(valid_paths)):
                 for j in range(i + 1, len(valid_paths)):
                     sim = float(sim_matrix[i][j])
-                    if sim > 0.72:
+                    if sim > sim_threshold:
                         fp_i = Path(valid_paths[i])
                         fp_j = Path(valid_paths[j])
                         stem_i = stem_from_path(fp_i, root)
@@ -365,8 +364,13 @@ def build_hyperedges(
         return []
 
     emb_matrix = np.array(emb_list)
+    # sklearn HDBSCAN has no 'cosine' metric; L2-normalize so that
+    # euclidean distance is monotonic in cosine distance
+    norms = np.linalg.norm(emb_matrix, axis=1, keepdims=True)
+    norms[norms == 0] = 1.0
+    emb_matrix = emb_matrix / norms
     try:
-        clusterer = HDBSCAN(min_cluster_size=3, metric='cosine')
+        clusterer = HDBSCAN(min_cluster_size=3, metric='euclidean')
         labels = clusterer.fit_predict(emb_matrix)
     except Exception:
         return []
@@ -507,7 +511,8 @@ def run_extraction(
     if verbose:
         print('Building edges...')
     edges = build_edges(files, root, embeddings,
-                        keywords_by_file, entities_by_file, texts)
+                        keywords_by_file, entities_by_file, texts,
+                        sim_threshold=sim_threshold)
     if verbose:
         print(f'  {len(edges)} edges')
 

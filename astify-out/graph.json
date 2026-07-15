@@ -1,0 +1,1675 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "id": "readme",
+      "label": "README",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_extract_astify_build",
+      "label": "extract astify build",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_tools_astify_pipeline",
+      "label": "tools astify pipeline",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_extract_astify",
+      "label": "extract astify",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_llm_semantic_extraction",
+      "label": "llm semantic extraction",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_manual_python_spacy",
+      "label": "manual python spacy",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_tools_astify",
+      "label": "tools astify",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_astify_extract_astify",
+      "label": "astify extract astify",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_astify_pipeline_astify",
+      "label": "astify pipeline astify",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_astify_extract",
+      "label": "astify extract",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_knowledge_graph_extraction",
+      "label": "knowledge graph extraction",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_astify_pipeline",
+      "label": "astify pipeline",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_output_astify_semantic",
+      "label": "output astify semantic",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_windows",
+      "label": "Windows (PRODUCT)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_linux",
+      "label": "Linux (GPE)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_cpu",
+      "label": "CPU (ORG)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "readme_gpu",
+      "label": "GPU (ORG)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_jwt",
+      "label": "JWT (WORK_OF_ART)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "readme_authservice",
+      "label": "AuthService (PRODUCT)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_keyword",
+      "label": "keyword (PERSON)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_ner",
+      "label": "NER (ORG)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "readme_louvain",
+      "label": "Louvain (LOC)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_networkx",
+      "label": "NetworkX (PERSON)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "readme_edge_type",
+      "label": "Edge Type (ORG)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_graphify",
+      "label": "Graphify (PERSON)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "readme_na",
+      "label": "N/A (ORG)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_llm",
+      "label": "LLM (ORG)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_keybert",
+      "label": "KeyBERT (ORG)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "readme_tokens",
+      "label": "Tokens (PERSON)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_invoke",
+      "label": "Invoke (ORG)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_claude_code",
+      "label": "Claude Code (WORK_OF_ART)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_opencode",
+      "label": "OpenCode (PRODUCT)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_node",
+      "label": "node (PERSON)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_pdf",
+      "label": "PDF (ORG)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "readme_mit",
+      "label": "MIT (ORG)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 0
+    },
+    {
+      "id": "skill",
+      "label": "SKILL",
+      "file_type": "document",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_documents_navigable_knowledge",
+      "label": "documents navigable knowledge",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_folder_documents_navigable",
+      "label": "folder documents navigable",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_tokens_astify_path",
+      "label": "tokens astify path",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_navigable_knowledge_graph",
+      "label": "navigable knowledge graph",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_path_concepts_astify",
+      "label": "path concepts astify",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_astify_queryable_knowledge",
+      "label": "astify queryable knowledge",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_documents_navigable",
+      "label": "documents navigable",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_astify_path_pipeline",
+      "label": "astify path pipeline",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_knowledge_graph_persistent",
+      "label": "knowledge graph persistent",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_astify_extract_path",
+      "label": "astify extract path",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_pathtodir_astify_graph",
+      "label": "path_to_dir astify graph",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_path_astify",
+      "label": "path astify",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_authmodule",
+      "label": "AuthModule (PRODUCT)",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_jwt",
+      "label": "JWT (WORK_OF_ART)",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_astify",
+      "label": "ASTify (ORG)",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_drop",
+      "label": "Drop (PERSON)",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_cpu",
+      "label": "CPU (ORG)",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_keybert",
+      "label": "KeyBERT (ORG)",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_ner",
+      "label": "NER (ORG)",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_networkx",
+      "label": "NetworkX (PERSON)",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_graph",
+      "label": "Graph (PERSON)",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "skill_graphify",
+      "label": "Graphify (FAC)",
+      "file_type": "concept",
+      "source_file": "SKILL.md",
+      "source_location": null,
+      "community": 1
+    },
+    {
+      "id": "astifyegginfo_sources",
+      "label": "SOURCES",
+      "file_type": "document",
+      "source_file": "astify.egg-info/SOURCES.txt",
+      "source_location": null,
+      "community": 2
+    },
+    {
+      "id": "astifyegginfo_sources_astify_build_py",
+      "label": "astify build py",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/SOURCES.txt",
+      "source_location": null,
+      "community": 2
+    },
+    {
+      "id": "astifyegginfo_sources_py_astify_egg",
+      "label": "py astify egg",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/SOURCES.txt",
+      "source_location": null,
+      "community": 2
+    },
+    {
+      "id": "astifyegginfo_sources_py_astify_build",
+      "label": "py astify build",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/SOURCES.txt",
+      "source_location": null,
+      "community": 2
+    },
+    {
+      "id": "astifyegginfo_sources_build_py_astify",
+      "label": "build py astify",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/SOURCES.txt",
+      "source_location": null,
+      "community": 2
+    },
+    {
+      "id": "astifyegginfo_sources_astify_extract_py",
+      "label": "astify extract py",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/SOURCES.txt",
+      "source_location": null,
+      "community": 2
+    },
+    {
+      "id": "astifyegginfo_sources_extract_py_astify",
+      "label": "extract py astify",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/SOURCES.txt",
+      "source_location": null,
+      "community": 2
+    },
+    {
+      "id": "astifyegginfo_sources_astify_init_py",
+      "label": "astify __init__ py",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/SOURCES.txt",
+      "source_location": null,
+      "community": 2
+    },
+    {
+      "id": "astifyegginfo_sources_export_py_astify",
+      "label": "export py astify",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/SOURCES.txt",
+      "source_location": null,
+      "community": 2
+    },
+    {
+      "id": "astifyegginfo_sources_py_astify_cli",
+      "label": "py astify cli",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/SOURCES.txt",
+      "source_location": null,
+      "community": 2
+    },
+    {
+      "id": "astifyegginfo_sources_astify_export_py",
+      "label": "astify export py",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/SOURCES.txt",
+      "source_location": null,
+      "community": 2
+    },
+    {
+      "id": "astifyegginfo_sources_init_py_astify",
+      "label": "__init__ py astify",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/SOURCES.txt",
+      "source_location": null,
+      "community": 2
+    },
+    {
+      "id": "astifyegginfo_sources_py_astify_extract",
+      "label": "py astify extract",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/SOURCES.txt",
+      "source_location": null,
+      "community": 2
+    },
+    {
+      "id": "astifyegginfo_dependencylinks",
+      "label": "dependency_links",
+      "file_type": "document",
+      "source_file": "astify.egg-info/dependency_links.txt",
+      "source_location": null,
+      "community": 3
+    },
+    {
+      "id": "astifyegginfo_entrypoints",
+      "label": "entry_points",
+      "file_type": "document",
+      "source_file": "astify.egg-info/entry_points.txt",
+      "source_location": null,
+      "community": 4
+    },
+    {
+      "id": "astifyegginfo_requires",
+      "label": "requires",
+      "file_type": "document",
+      "source_file": "astify.egg-info/requires.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "astifyegginfo_requires_sentence_transformers_spacy",
+      "label": "sentence transformers spacy",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/requires.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "astifyegginfo_requires_spacy_keybert_scikit",
+      "label": "spacy keybert scikit",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/requires.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "astifyegginfo_requires_scikit_learn_pymupdf",
+      "label": "scikit learn pymupdf",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/requires.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "astifyegginfo_requires_sentence_transformers",
+      "label": "sentence transformers",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/requires.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "astifyegginfo_requires_scikit_learn",
+      "label": "scikit learn",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/requires.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "astifyegginfo_requires_keybert_scikit_learn",
+      "label": "keybert scikit learn",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/requires.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "astifyegginfo_requires_scikit",
+      "label": "scikit",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/requires.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "astifyegginfo_requires_hnswlib_pyyaml_numpy",
+      "label": "hnswlib pyyaml numpy",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/requires.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "astifyegginfo_requires_keybert_scikit",
+      "label": "keybert scikit",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/requires.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "astifyegginfo_requires_transformers_spacy",
+      "label": "transformers spacy",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/requires.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "astifyegginfo_requires_learn_pymupdf_23",
+      "label": "learn pymupdf 23",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/requires.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "astifyegginfo_requires_pyyaml_numpy",
+      "label": "pyyaml numpy",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/requires.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "astifyegginfo_requires_keybert080",
+      "label": "keybert>=0.8.0 (ORG)",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/requires.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "astifyegginfo_requires_pymupdf1230",
+      "label": "PyMuPDF>=1.23.0 (PERSON)",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/requires.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "astifyegginfo_requires_pyvis030",
+      "label": "pyvis>=0.3.0 (ORG)",
+      "file_type": "concept",
+      "source_file": "astify.egg-info/requires.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "astifyegginfo_toplevel",
+      "label": "top_level",
+      "file_type": "document",
+      "source_file": "astify.egg-info/top_level.txt",
+      "source_location": null,
+      "community": 5
+    },
+    {
+      "id": "requirements",
+      "label": "requirements",
+      "file_type": "document",
+      "source_file": "requirements.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "requirements_sentence_transformers_spacy",
+      "label": "sentence transformers spacy",
+      "file_type": "concept",
+      "source_file": "requirements.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "requirements_spacy_keybert_scikit",
+      "label": "spacy keybert scikit",
+      "file_type": "concept",
+      "source_file": "requirements.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "requirements_scikit_learn_pymupdf",
+      "label": "scikit learn pymupdf",
+      "file_type": "concept",
+      "source_file": "requirements.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "requirements_sentence_transformers",
+      "label": "sentence transformers",
+      "file_type": "concept",
+      "source_file": "requirements.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "requirements_scikit_learn",
+      "label": "scikit learn",
+      "file_type": "concept",
+      "source_file": "requirements.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "requirements_keybert_scikit_learn",
+      "label": "keybert scikit learn",
+      "file_type": "concept",
+      "source_file": "requirements.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "requirements_scikit",
+      "label": "scikit",
+      "file_type": "concept",
+      "source_file": "requirements.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "requirements_hnswlib_pyyaml_numpy",
+      "label": "hnswlib pyyaml numpy",
+      "file_type": "concept",
+      "source_file": "requirements.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "requirements_keybert_scikit",
+      "label": "keybert scikit",
+      "file_type": "concept",
+      "source_file": "requirements.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "requirements_transformers_spacy",
+      "label": "transformers spacy",
+      "file_type": "concept",
+      "source_file": "requirements.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "requirements_learn_pymupdf_23",
+      "label": "learn pymupdf 23",
+      "file_type": "concept",
+      "source_file": "requirements.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "requirements_pyyaml_numpy",
+      "label": "pyyaml numpy",
+      "file_type": "concept",
+      "source_file": "requirements.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "requirements_keybert080",
+      "label": "keybert>=0.8.0 (ORG)",
+      "file_type": "concept",
+      "source_file": "requirements.txt",
+      "source_location": null,
+      "community": 6
+    },
+    {
+      "id": "requirements_pymupdf1230",
+      "label": "PyMuPDF>=1.23.0 (PERSON)",
+      "file_type": "concept",
+      "source_file": "requirements.txt",
+      "source_location": null,
+      "community": 6
+    }
+  ],
+  "links": [
+    {
+      "source": "readme",
+      "target": "readme_extract_astify_build",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.56
+    },
+    {
+      "source": "readme",
+      "target": "readme_tools_astify_pipeline",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.52
+    },
+    {
+      "source": "readme",
+      "target": "readme_extract_astify",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "readme",
+      "target": "readme_llm_semantic_extraction",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "readme",
+      "target": "readme_manual_python_spacy",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "readme",
+      "target": "readme_tools_astify",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "readme",
+      "target": "readme_astify_extract_astify",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "readme",
+      "target": "readme_astify_pipeline_astify",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "readme",
+      "target": "readme_astify_extract",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "readme",
+      "target": "readme_knowledge_graph_extraction",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "readme",
+      "target": "readme_astify_pipeline",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "readme",
+      "target": "readme_output_astify_semantic",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "readme",
+      "target": "readme_windows",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75
+    },
+    {
+      "source": "readme",
+      "target": "readme_linux",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "readme",
+      "target": "readme_cpu",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "readme",
+      "target": "readme_gpu",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "readme",
+      "target": "readme_jwt",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75
+    },
+    {
+      "source": "readme",
+      "target": "readme_authservice",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75
+    },
+    {
+      "source": "readme",
+      "target": "readme_keyword",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "readme",
+      "target": "readme_ner",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "readme",
+      "target": "readme_louvain",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75
+    },
+    {
+      "source": "readme",
+      "target": "readme_networkx",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "readme",
+      "target": "readme_edge_type",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "readme",
+      "target": "readme_graphify",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "readme",
+      "target": "readme_na",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "readme",
+      "target": "readme_llm",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "readme",
+      "target": "readme_keybert",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "readme",
+      "target": "readme_tokens",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "readme",
+      "target": "readme_invoke",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "readme",
+      "target": "readme_claude_code",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75
+    },
+    {
+      "source": "readme",
+      "target": "readme_opencode",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75
+    },
+    {
+      "source": "readme",
+      "target": "readme_node",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "readme",
+      "target": "readme_pdf",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "readme",
+      "target": "readme_mit",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "readme_cpu",
+      "target": "skill_cpu",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75
+    },
+    {
+      "source": "readme_jwt",
+      "target": "skill_jwt",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75
+    },
+    {
+      "source": "readme_ner",
+      "target": "skill_ner",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75
+    },
+    {
+      "source": "readme_networkx",
+      "target": "skill_networkx",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75
+    },
+    {
+      "source": "readme_graphify",
+      "target": "skill_graphify",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75
+    },
+    {
+      "source": "readme_keybert",
+      "target": "skill_keybert",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75
+    },
+    {
+      "source": "skill",
+      "target": "skill_documents_navigable_knowledge",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.55
+    },
+    {
+      "source": "skill",
+      "target": "skill_folder_documents_navigable",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.53
+    },
+    {
+      "source": "skill",
+      "target": "skill_tokens_astify_path",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.52
+    },
+    {
+      "source": "skill",
+      "target": "skill_navigable_knowledge_graph",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "skill",
+      "target": "skill_path_concepts_astify",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "skill",
+      "target": "skill_astify_queryable_knowledge",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "skill",
+      "target": "skill_documents_navigable",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "skill",
+      "target": "skill_astify_path_pipeline",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "skill",
+      "target": "skill_knowledge_graph_persistent",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "skill",
+      "target": "skill_astify_extract_path",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "skill",
+      "target": "skill_pathtodir_astify_graph",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "skill",
+      "target": "skill_path_astify",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "skill",
+      "target": "skill_authmodule",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75
+    },
+    {
+      "source": "skill",
+      "target": "skill_jwt",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75
+    },
+    {
+      "source": "skill",
+      "target": "skill_astify",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "skill",
+      "target": "skill_drop",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "skill",
+      "target": "skill_cpu",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "skill",
+      "target": "skill_keybert",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "skill",
+      "target": "skill_ner",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "skill",
+      "target": "skill_networkx",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "skill",
+      "target": "skill_graph",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "skill",
+      "target": "skill_graphify",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75
+    },
+    {
+      "source": "astifyegginfo_sources",
+      "target": "astifyegginfo_sources_astify_build_py",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.66
+    },
+    {
+      "source": "astifyegginfo_sources",
+      "target": "astifyegginfo_sources_py_astify_egg",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65
+    },
+    {
+      "source": "astifyegginfo_sources",
+      "target": "astifyegginfo_sources_py_astify_build",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65
+    },
+    {
+      "source": "astifyegginfo_sources",
+      "target": "astifyegginfo_sources_build_py_astify",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65
+    },
+    {
+      "source": "astifyegginfo_sources",
+      "target": "astifyegginfo_sources_astify_extract_py",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65
+    },
+    {
+      "source": "astifyegginfo_sources",
+      "target": "astifyegginfo_sources_extract_py_astify",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.64
+    },
+    {
+      "source": "astifyegginfo_sources",
+      "target": "astifyegginfo_sources_astify_init_py",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.64
+    },
+    {
+      "source": "astifyegginfo_sources",
+      "target": "astifyegginfo_sources_export_py_astify",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.63
+    },
+    {
+      "source": "astifyegginfo_sources",
+      "target": "astifyegginfo_sources_py_astify_cli",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.62
+    },
+    {
+      "source": "astifyegginfo_sources",
+      "target": "astifyegginfo_sources_astify_export_py",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.62
+    },
+    {
+      "source": "astifyegginfo_sources",
+      "target": "astifyegginfo_sources_init_py_astify",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.62
+    },
+    {
+      "source": "astifyegginfo_sources",
+      "target": "astifyegginfo_sources_py_astify_extract",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.61
+    },
+    {
+      "source": "astifyegginfo_requires",
+      "target": "astifyegginfo_requires_sentence_transformers_spacy",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.55
+    },
+    {
+      "source": "astifyegginfo_requires",
+      "target": "astifyegginfo_requires_spacy_keybert_scikit",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.54
+    },
+    {
+      "source": "astifyegginfo_requires",
+      "target": "astifyegginfo_requires_scikit_learn_pymupdf",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.53
+    },
+    {
+      "source": "astifyegginfo_requires",
+      "target": "astifyegginfo_requires_sentence_transformers",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.53
+    },
+    {
+      "source": "astifyegginfo_requires",
+      "target": "astifyegginfo_requires_scikit_learn",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "astifyegginfo_requires",
+      "target": "astifyegginfo_requires_keybert_scikit_learn",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "astifyegginfo_requires",
+      "target": "astifyegginfo_requires_scikit",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "astifyegginfo_requires",
+      "target": "astifyegginfo_requires_hnswlib_pyyaml_numpy",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "astifyegginfo_requires",
+      "target": "astifyegginfo_requires_keybert_scikit",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "astifyegginfo_requires",
+      "target": "astifyegginfo_requires_transformers_spacy",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "astifyegginfo_requires",
+      "target": "astifyegginfo_requires_learn_pymupdf_23",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "astifyegginfo_requires",
+      "target": "astifyegginfo_requires_pyyaml_numpy",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "astifyegginfo_requires",
+      "target": "astifyegginfo_requires_keybert080",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "astifyegginfo_requires",
+      "target": "astifyegginfo_requires_pymupdf1230",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "astifyegginfo_requires",
+      "target": "astifyegginfo_requires_pyvis030",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "astifyegginfo_requires",
+      "target": "requirements",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "astifyegginfo_requires_sentence_transformers_spacy",
+      "target": "requirements_sentence_transformers_spacy",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.55
+    },
+    {
+      "source": "astifyegginfo_requires_spacy_keybert_scikit",
+      "target": "requirements_spacy_keybert_scikit",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.54
+    },
+    {
+      "source": "astifyegginfo_requires_scikit_learn_pymupdf",
+      "target": "requirements_scikit_learn_pymupdf",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.53
+    },
+    {
+      "source": "astifyegginfo_requires_sentence_transformers",
+      "target": "requirements_sentence_transformers",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.53
+    },
+    {
+      "source": "astifyegginfo_requires_scikit_learn",
+      "target": "requirements_scikit_learn",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "astifyegginfo_requires_keybert_scikit_learn",
+      "target": "requirements_keybert_scikit_learn",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "astifyegginfo_requires_scikit",
+      "target": "requirements_scikit",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "astifyegginfo_requires_hnswlib_pyyaml_numpy",
+      "target": "requirements_hnswlib_pyyaml_numpy",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "astifyegginfo_requires_keybert_scikit",
+      "target": "requirements_keybert_scikit",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "astifyegginfo_requires_transformers_spacy",
+      "target": "requirements_transformers_spacy",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "astifyegginfo_requires_learn_pymupdf_23",
+      "target": "requirements_learn_pymupdf_23",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "astifyegginfo_requires_pyyaml_numpy",
+      "target": "requirements_pyyaml_numpy",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "astifyegginfo_requires_keybert080",
+      "target": "requirements_keybert080",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75
+    },
+    {
+      "source": "astifyegginfo_requires_pymupdf1230",
+      "target": "requirements_pymupdf1230",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75
+    },
+    {
+      "source": "requirements",
+      "target": "requirements_sentence_transformers_spacy",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.56
+    },
+    {
+      "source": "requirements",
+      "target": "requirements_spacy_keybert_scikit",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.54
+    },
+    {
+      "source": "requirements",
+      "target": "requirements_scikit_learn_pymupdf",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.53
+    },
+    {
+      "source": "requirements",
+      "target": "requirements_sentence_transformers",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.53
+    },
+    {
+      "source": "requirements",
+      "target": "requirements_scikit_learn",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "requirements",
+      "target": "requirements_keybert_scikit_learn",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "requirements",
+      "target": "requirements_scikit",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "requirements",
+      "target": "requirements_hnswlib_pyyaml_numpy",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "requirements",
+      "target": "requirements_keybert_scikit",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "requirements",
+      "target": "requirements_transformers_spacy",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "requirements",
+      "target": "requirements_learn_pymupdf_23",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "requirements",
+      "target": "requirements_pyyaml_numpy",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5
+    },
+    {
+      "source": "requirements",
+      "target": "requirements_keybert080",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    },
+    {
+      "source": "requirements",
+      "target": "requirements_pymupdf1230",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85
+    }
+  ]
+}

@@ -4,7 +4,7 @@ from pathlib import Path
 from collections import defaultdict
 
 
-def build_from_semantic(semantic: dict, root: str = '.') -> dict:
+def build_from_semantic(semantic: dict, root: str = '.') -> tuple[dict, dict]:
     """Build NetworkX graph from semantic extraction dict.
 
     Returns a node-link graph dict compatible with graph.json.
