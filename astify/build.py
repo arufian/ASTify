@@ -28,6 +28,8 @@ def build_from_semantic(semantic: dict, root: str = '.') -> tuple[dict, dict]:
             'source_file': node.get('source_file', ''),
             'source_location': node.get('source_location'),
             'symbol_kind': node.get('symbol_kind'),
+            'parser': node.get('parser'),
+            'language': node.get('language'),
             'community': -1,
         }
 
@@ -42,7 +44,9 @@ def build_from_semantic(semantic: dict, root: str = '.') -> tuple[dict, dict]:
         G.add_edge(src, tgt, relation=rel, confidence=conf,
                    confidence_score=score,
                    source_file=edge.get('source_file', ''),
-                   source_location=edge.get('source_location'))
+                   source_location=edge.get('source_location'),
+                   edge_source=src,
+                   edge_target=tgt)
 
     # Community detection (Louvain)
     communities = {}
@@ -130,7 +134,10 @@ def build_from_semantic(semantic: dict, root: str = '.') -> tuple[dict, dict]:
     node_link_data = {
         'directed': False,
         'multigraph': False,
-        'graph': {},
+        'graph': {
+            'schema_version': semantic.get('schema_version', 1),
+            'structural_parser': semantic.get('structural_parser'),
+        },
         'nodes': [{'id': nid, **nodes_data[nid]} for nid in G.nodes()],
         'links': [
             {
@@ -141,6 +148,8 @@ def build_from_semantic(semantic: dict, root: str = '.') -> tuple[dict, dict]:
                 'confidence_score': G[u][v].get('confidence_score', 0.75),
                 'source_file': G[u][v].get('source_file', ''),
                 'source_location': G[u][v].get('source_location'),
+                'edge_source': G[u][v].get('edge_source', u),
+                'edge_target': G[u][v].get('edge_target', v),
             }
             for u, v in G.edges()
         ],
@@ -158,6 +167,8 @@ def build_from_semantic(semantic: dict, root: str = '.') -> tuple[dict, dict]:
         'num_communities': len(communities),
         'input_tokens': semantic.get('input_tokens', 0),
         'output_tokens': semantic.get('output_tokens', 0),
+        'schema_version': semantic.get('schema_version', 1),
+        'structural_parser': semantic.get('structural_parser'),
     }
 
     return node_link_data, meta

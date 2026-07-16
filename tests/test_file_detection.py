@@ -82,6 +82,16 @@ class FileDetectionTests(unittest.TestCase):
         self.assertNotIn('.yaml', SYMBOL_CODE_EXTS)
         self.assertIn('.cls', SYMBOL_CODE_EXTS)
 
+    def test_utf8_sample_ending_mid_character_remains_text(self):
+        source = self.write(
+            'src/LargeSource.cls',
+            ('a' * 8191) + '界' + '\npublic class LargeSource {}\n',
+        )
+
+        found = detect_content_files(self.root)
+
+        self.assertIn(source, found)
+
 
 if __name__ == '__main__':
     unittest.main()

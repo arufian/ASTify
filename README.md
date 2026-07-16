@@ -1,8 +1,11 @@
 # ASTify
 
-Embedding-based knowledge graph extraction — zero AI tokens.
+Tree-sitter AST + embedding knowledge graph extraction — zero AI tokens.
 
-Replaces LLM semantic extraction with local embeddings, keyword analysis, and named entity recognition. Fully self-contained: extract, build, query, visualize — no API keys, no token costs.
+Combines real code structure with local embeddings, keyword analysis, and named
+entity recognition. Runs locally without API keys or AI-token costs after
+dependencies and local NLP/embedding models are available. First use may
+download those models.
 
 ## Install
 
@@ -44,7 +47,8 @@ astify explain "AuthService"
 ```
 Readable files (source code, XML, YAML, docs, PDFs, any text extension)
     │
-    ├─► deterministic syntax scan → symbols + EXTRACTED structural edges
+    ├─► Tree-sitter AST (Apex, JS, TS/TSX) → symbols + EXTRACTED edges
+    ├─► syntax fallback (other code) → HEURISTIC edges
     ├─► sentence-transformers → embeddings → cosine similarity edges
     ├─► KeyBERT → keyword extraction → concept nodes
     ├─► spaCy NER → named entity nodes
@@ -62,14 +66,37 @@ and extensionless files are included when their content is readable text.
 Binary files, hidden paths, dependencies, build outputs, and ASTify/Graphify
 output directories are skipped.
 
-Programming source files using common declaration syntax also receive
-deterministic class, method, call, constructor, and assignment nodes with line
-locations. Structural `defines`, `calls`,
-`instantiates`, `assigns`, and `references` edges are marked `EXTRACTED`.
+Tree-sitter parses Apex, JavaScript, TypeScript, and TSX into class, method,
+function, call, constructor, and assignment nodes with line-and-column
+locations. Structural `defines`, `calls`, `resolves_to`, `instantiates`, and
+`assigns` edges from those ASTs are marked `EXTRACTED`. Explicit Salesforce
+`@salesforce/apex/Class.method` imports resolve JavaScript calls to Apex methods
+across files.
+
+Other programming extensions use a language-tolerant syntax fallback. Those
+edges are marked `HEURISTIC`, never `EXTRACTED`, so query output exposes the
+lower assurance level.
+
 Identifier-aware query expansion preserves CamelCase and snake_case symbols,
 while structural matches rank ahead of embedding-only concepts.
 Minified/generated bundles and identifiers found only inside comments or string
 literals are excluded from structural extraction.
+
+Existing graphs built before schema version 2 must be rebuilt. Querying one
+prints a warning with the required commands.
+
+## Query Scope and Limits
+
+- Exact symbol, definition, constructor, assignment, and call queries are
+  structural for Apex, JavaScript, TypeScript, and TSX.
+- Topic and architecture discovery still uses `INFERRED` embedding/NLP edges.
+- ASTify is not a compiler or language server. Dynamic dispatch, reflection,
+  runtime dependency injection, and ambiguous unimported cross-file calls may
+  remain unresolved or `INFERRED`.
+- Unsupported languages remain useful for coarse discovery and heuristic
+  symbol navigation, but precision is lower than Tree-sitter-backed languages.
+- If direct structural matches are absent, use source search or a language
+  server rather than treating embedding similarity as an exact answer.
 
 ```
 astify-out/
@@ -82,9 +109,10 @@ astify-out/
 
 ## Comparison with Graphify LLM Extraction
 
-| Edge Type | Graphify (LLM) | ASTify (embeddings) |
+| Edge Type | Graphify (LLM) | ASTify |
 |-----------|---------------|---------------------|
-| `defines`, `calls`, `instantiates`, `assigns` | AST | Deterministic syntax scan |
+| `defines`, `calls`, `resolves_to`, `instantiates`, `assigns` | AST | Tree-sitter AST (`EXTRACTED`) |
+| Structural fallback | N/A | Syntax scan (`HEURISTIC`) |
 | `conceptually_related_to` | LLM | KeyBERT keywords |
 | `references` | LLM | spaCy NER + co-occurrence |
 | `semantically_similar_to` | LLM | Cosine similarity |
@@ -116,6 +144,7 @@ Skill auto-installs via `uv tool install` if not present.
 - `pyvis` — HTML visualization
 - `PyMuPDF` — PDF extraction
 - `PyYAML` — frontmatter parsing
+- `tree-sitter-language-pack` — bundled Apex, JavaScript, TypeScript, and TSX parsers
 
 ## License
 

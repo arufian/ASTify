@@ -12,7 +12,7 @@ STOPWORDS = {
     'who', 'why', 'with',
 }
 STRUCTURAL_RELATIONS = {
-    'defines', 'calls', 'instantiates', 'assigns', 'references',
+    'defines', 'calls', 'instantiates', 'assigns', 'references', 'resolves_to',
 }
 
 
@@ -31,6 +31,12 @@ def _load_graph(directory: str) -> tuple:
         raise ImportError('networkx required. pip install networkx')
 
     data = json.loads(graph_path.read_text(encoding='utf-8'))
+    graph_meta = data.get('graph', {})
+    if graph_meta.get('schema_version', 1) < 2:
+        print(
+            'WARNING: Graph predates Tree-sitter symbol extraction. '
+            'Run `astify extract .` then `astify build .` to rebuild it.'
+        )
     G = json_graph.node_link_graph(data, edges='links')
     return G, root
 
@@ -62,7 +68,7 @@ def _text_tokens(text: str) -> list[str]:
 
 def _node_search_text(ndata: dict) -> str:
     return ' '.join(str(ndata.get(key, '') or '') for key in (
-        'label', 'source_file', 'symbol_kind',
+        'label', 'source_file', 'symbol_kind', 'parser', 'language',
     ))
 
 
@@ -94,6 +100,7 @@ def _expand_query_terms(G, question: str) -> list[str]:
 def _find_start_nodes(G, terms: list[str], top_k: int = 8,
                       question: str = '') -> list:
     question_lower = question.lower()
+    asks_about_tests = 'test' in question_lower
     creation_intent = any(
         word in question_lower
         for word in ('create', 'creates', 'created', 'creating', 'new', 'instantiate')
@@ -103,22 +110,39 @@ def _find_start_nodes(G, terms: list[str], top_k: int = 8,
         label = (ndata.get('label', '') or '').lower()
         source = (ndata.get('source_file', '') or '').lower()
         label_tokens = set(_text_tokens(ndata.get('label', '') or ''))
-        matched = [term for term in terms if term in label or term in source]
+        label_matched = [term for term in terms if term in label]
+        source_matched = [
+            term for term in terms if term in source and term not in label
+        ]
+        matched = label_matched + source_matched
         score = 0
-        for term in matched:
+        for term in label_matched:
             if term in label_tokens:
-                score += 10
+                score += 10 + min(len(term), 24)
             elif term in label:
                 score += 6
+        for term in source_matched:
             if term in source:
                 score += 2
-        score += len(set(matched)) * 4
-        if matched and ndata.get('file_type') == 'symbol':
+        score += len(set(label_matched)) * 5
+        score += len(set(source_matched))
+        if label_matched and ndata.get('file_type') == 'symbol':
             score += 8
-        if matched and ndata.get('source_location'):
+        if label_matched and ndata.get('source_location'):
             score += 2
-        if creation_intent and ndata.get('symbol_kind') == 'constructor_call':
+        if (
+            creation_intent
+            and label_matched
+            and ndata.get('symbol_kind') == 'constructor_call'
+        ):
             score += 20
+        source_stem = Path(source).stem
+        if not asks_about_tests and (
+            source_stem.endswith('test')
+            or '/tests/' in f'/{source}/'
+            or '/test/' in f'/{source}/'
+        ):
+            score -= 15
         if score > 0:
             scored.append((score, nid))
     scored.sort(key=lambda item: (-item[0], str(item[1])))
@@ -128,8 +152,13 @@ def _find_start_nodes(G, terms: list[str], top_k: int = 8,
 def _edge_priority(edge: dict) -> tuple:
     relation = edge.get('relation', '')
     confidence = edge.get('confidence', '')
+    confidence_rank = {
+        'EXTRACTED': 0,
+        'HEURISTIC': 1,
+        'INFERRED': 2,
+    }.get(confidence, 3)
     return (
-        0 if confidence == 'EXTRACTED' else 1,
+        confidence_rank,
         0 if relation in STRUCTURAL_RELATIONS else 1,
         relation,
     )
@@ -168,7 +197,7 @@ def query_graph(question: str, mode: str = 'bfs', budget: int = 2000,
         stack = [(n, 0) for n in reversed(start_nodes)]
         while stack:
             node, depth = stack.pop()
-            if node in visited or depth > 6:
+            if node in visited or depth > 6 or len(subgraph_nodes) >= 60:
                 continue
             visited.add(node)
             if node not in subgraph_nodes:
@@ -189,6 +218,8 @@ def query_graph(question: str, mode: str = 'bfs', budget: int = 2000,
         for _ in range(2):
             next_frontier = []
             for n in frontier:
+                if len(subgraph_nodes) >= 60:
+                    break
                 neighbors = sorted(
                     G.neighbors(n),
                     key=lambda neighbor: _edge_priority(G[n][neighbor]),
@@ -197,6 +228,8 @@ def query_graph(question: str, mode: str = 'bfs', budget: int = 2000,
                     if neighbor in subgraph_nodes:
                         remember_edge(n, neighbor)
                     if neighbor not in subgraph_nodes:
+                        if len(subgraph_nodes) >= 60:
+                            break
                         next_frontier.append(neighbor)
                         ordered_nodes.append(neighbor)
                         subgraph_nodes.add(neighbor)
@@ -213,19 +246,22 @@ def query_graph(question: str, mode: str = 'bfs', budget: int = 2000,
         location = f' loc={d.get("source_location")}' if d.get('source_location') else ''
         lines.append(f'  {d.get("label", nid)} [{d.get("file_type","")}'
                      f' src={d.get("source_file","")}{location}]')
+    lines.append('Connections:')
+    for u, v in subgraph_edges[:50]:
+        edge = G[u][v]
+        location = f' at {edge.get("source_location")}' if edge.get('source_location') else ''
+        edge_source = edge.get('edge_source', u)
+        edge_target = edge.get('edge_target', v)
+        lines.append(f'  {G.nodes[edge_source].get("label",edge_source)}'
+                     f' --{edge.get("relation","")}'
+                     f' [{edge.get("confidence","")}{location}]-->'
+                     f' {G.nodes[edge_target].get("label",edge_target)}')
     lines.append('Traversal nodes:')
     for nid in ordered_nodes[:30]:
         d = G.nodes[nid]
         location = f' loc={d.get("source_location")}' if d.get('source_location') else ''
         lines.append(f'  {d.get("label", nid)} [{d.get("file_type","")}'
                      f' src={d.get("source_file","")}{location}]')
-    for u, v in subgraph_edges[:50]:
-        edge = G[u][v]
-        location = f' at {edge.get("source_location")}' if edge.get('source_location') else ''
-        lines.append(f'  {G.nodes[u].get("label",u)}'
-                     f' --{edge.get("relation","")}'
-                     f' [{edge.get("confidence","")}{location}]-->'
-                     f' {G.nodes[v].get("label",v)}')
 
     output = '\n'.join(lines)
     if len(output) > char_budget:
@@ -263,15 +299,17 @@ def find_path(node_a: str, node_b: str, directory: str = '.',
     try:
         path = nx.shortest_path(G, src, tgt)
         print(f'Shortest path ({len(path) - 1} hops):')
-        for i, nid in enumerate(path):
-            label = G.nodes[nid].get('label', nid)
-            if i < len(path) - 1:
-                edge = G[nid][path[i + 1]]
-                rel = edge.get('relation', '')
-                conf = edge.get('confidence', '')
-                print(f'  {label} --{rel}--> [{conf}]')
-            else:
-                print(f'  {label}')
+        if len(path) == 1:
+            print(f'  {G.nodes[path[0]].get("label", path[0])}')
+        for current, following in zip(path, path[1:]):
+            edge = G[current][following]
+            rel = edge.get('relation', '')
+            conf = edge.get('confidence', '')
+            edge_source = edge.get('edge_source', current)
+            edge_target = edge.get('edge_target', following)
+            source_label = G.nodes[edge_source].get('label', edge_source)
+            target_label = G.nodes[edge_target].get('label', edge_target)
+            print(f'  {source_label} --{rel}--> {target_label} [{conf}]')
     except nx.NetworkXNoPath:
         print(f'No path between {node_a!r} and {node_b!r}')
     except nx.NodeNotFound as e:
@@ -310,4 +348,7 @@ def explain_node(node: str, directory: str = '.', quiet: bool = False):
         nlabel = G.nodes[neighbor].get('label', neighbor)
         rel = edge.get('relation', '')
         conf = edge.get('confidence', '')
-        print(f'  --{rel}--> {nlabel} [{conf}]')
+        if edge.get('edge_target') == nid:
+            print(f'  <--{rel}-- {nlabel} [{conf}]')
+        else:
+            print(f'  --{rel}--> {nlabel} [{conf}]')

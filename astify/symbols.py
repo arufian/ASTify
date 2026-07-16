@@ -2,6 +2,7 @@
 import re
 from pathlib import Path
 
+from astify.ast_symbols import extract_ast_symbols
 from astify.identifiers import normalize_id, stem_from_path
 
 
@@ -196,7 +197,7 @@ def _owner_at(line_number: int, ranges: list[dict]) -> dict | None:
     return min(matches, key=lambda item: item['end'] - item['line'])
 
 
-def extract_code_symbols(
+def _extract_heuristic_symbols(
     files: list[Path],
     root: Path,
     texts: dict[str, str],
@@ -204,8 +205,9 @@ def extract_code_symbols(
     """Extract source symbols and structural edges without an LLM or parser.
 
     Patterns intentionally cover common declaration syntax across languages.
-    Results represent syntax observed in source, so edges use EXTRACTED rather
-    than embedding-derived INFERRED confidence.
+    Used only when no Tree-sitter grammar is configured or parsing fails.
+    Edges use HEURISTIC confidence so fallback output cannot be mistaken for
+    true AST extraction.
     """
     nodes = []
     edges = []
@@ -227,8 +229,8 @@ def extract_code_symbols(
             'source': source,
             'target': target,
             'relation': relation,
-            'confidence': 'EXTRACTED',
-            'confidence_score': 1.0,
+            'confidence': 'HEURISTIC',
+            'confidence_score': 0.7,
             'source_file': source_file,
             'source_location': f'line {line_number}',
             'weight': 1.0,
@@ -261,6 +263,7 @@ def extract_code_symbols(
                 'label': name,
                 'file_type': 'symbol',
                 'symbol_kind': definition['kind'],
+                'parser': 'heuristic',
                 'source_file': rel_str,
                 'source_location': f"line {definition['line']}",
             })
@@ -313,6 +316,7 @@ def extract_code_symbols(
                     'label': f'new {name}',
                     'file_type': 'symbol',
                     'symbol_kind': 'constructor_call',
+                    'parser': 'heuristic',
                     'source_file': rel_str,
                     'source_location': f'line {line_number}',
                 })
@@ -331,6 +335,7 @@ def extract_code_symbols(
                     'label': f'{name} assignment',
                     'file_type': 'symbol',
                     'symbol_kind': 'assignment',
+                    'parser': 'heuristic',
                     'source_file': rel_str,
                     'source_location': f'line {line_number}',
                 })
@@ -345,6 +350,7 @@ def extract_code_symbols(
                     'label': name,
                     'file_type': 'symbol',
                     'symbol_kind': 'reference',
+                    'parser': 'heuristic',
                     'source_file': rel_str,
                     'source_location': f'line {line_number}',
                 })
@@ -352,3 +358,25 @@ def extract_code_symbols(
                          line_number)
 
     return nodes, edges
+
+
+def extract_code_symbols(
+    files: list[Path],
+    root: Path,
+    texts: dict[str, str],
+) -> tuple[list[dict], list[dict]]:
+    """Extract real AST symbols where supported, with honest fallback."""
+    eligible = [
+        filepath for filepath in files
+        if not _is_generated_source(filepath, texts.get(str(filepath), ''))
+    ]
+    ast_nodes, ast_edges, parsed_files = extract_ast_symbols(
+        eligible, root, texts
+    )
+    fallback_files = [
+        filepath for filepath in eligible if filepath not in parsed_files
+    ]
+    fallback_nodes, fallback_edges = _extract_heuristic_symbols(
+        fallback_files, root, texts
+    )
+    return ast_nodes + fallback_nodes, ast_edges + fallback_edges

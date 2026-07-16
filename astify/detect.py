@@ -5,7 +5,8 @@ from pathlib import Path
 TEXT_EXTS = {'.md', '.txt', '.rst', '.adoc', '.org', '.tex', '.wiki', '.asciidoc'}
 DOC_EXTS = TEXT_EXTS | {'.pdf'}
 CODE_EXTS = {
-    '.py', '.js', '.ts', '.jsx', '.tsx', '.go', '.rs', '.java', '.kt',
+    '.py', '.js', '.mjs', '.cjs', '.ts', '.jsx', '.tsx', '.go', '.rs',
+    '.java', '.kt',
     '.c', '.cpp', '.h', '.hpp', '.rb', '.swift', '.scala', '.cs', '.php',
     '.sh', '.bash', '.zsh', '.sql', '.r', '.jl', '.lua', '.pl', '.pm',
     '.dart', '.ex', '.exs', '.clj', '.cljs', '.elm', '.hs', '.ml',
@@ -72,11 +73,17 @@ def is_text_file(path: Path, sample_size: int = 8192) -> bool:
 
     try:
         if sample.startswith((codecs.BOM_UTF32_LE, codecs.BOM_UTF32_BE)):
-            text = sample.decode('utf-32')
+            encoding = 'utf-32'
         elif sample.startswith((codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE)):
-            text = sample.decode('utf-16')
+            encoding = 'utf-16'
         else:
-            text = sample.decode('utf-8-sig')
+            encoding = 'utf-8-sig'
+        # A fixed-size sample can end halfway through a valid multibyte
+        # character. Incremental decoding validates complete bytes while
+        # retaining an incomplete trailing sequence for a hypothetical next
+        # chunk instead of misclassifying the whole file as binary.
+        decoder = codecs.getincrementaldecoder(encoding)(errors='strict')
+        text = decoder.decode(sample, final=False)
     except UnicodeDecodeError:
         return False
 

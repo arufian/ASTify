@@ -14,6 +14,10 @@ from astify.query import _expand_query_terms, _find_start_nodes, query_graph
 class QueryTests(unittest.TestCase):
     def build_graph(self):
         graph = nx.Graph()
+        graph.graph.update({
+            'schema_version': 2,
+            'structural_parser': 'tree-sitter',
+        })
         graph.add_node(
             'file',
             label='ArtifactService.cls',
@@ -93,6 +97,24 @@ class QueryTests(unittest.TestCase):
 
         self.assertEqual(starts[0], 'constructor')
 
+    def test_production_symbol_ranks_before_same_test_symbol(self):
+        graph = self.build_graph()
+        graph.add_node(
+            'test_constructor',
+            label='new ArtifactLink',
+            file_type='symbol',
+            symbol_kind='constructor_call',
+            source_file='src/classes/ArtifactServiceTest.cls',
+            source_location='line 20:9',
+        )
+        terms = _expand_query_terms(graph, 'where is ArtifactLink created')
+
+        starts = _find_start_nodes(
+            graph, terms, question='where is ArtifactLink created'
+        )
+
+        self.assertLess(starts.index('constructor'), starts.index('test_constructor'))
+
     def test_query_prints_direct_symbol_locations_and_structural_edges(self):
         graph = self.build_graph()
         with tempfile.TemporaryDirectory() as tempdir:
@@ -114,6 +136,20 @@ class QueryTests(unittest.TestCase):
         self.assertIn('new ArtifactLink [symbol', output)
         self.assertIn('loc=line 3', output)
         self.assertIn('--instantiates [EXTRACTED at line 3]-->', output)
+
+    def test_query_warns_when_graph_predates_ast_schema(self):
+        graph = self.build_graph()
+        graph.graph.clear()
+        with tempfile.TemporaryDirectory() as tempdir:
+            out = Path(tempdir) / 'astify-out'
+            out.mkdir()
+            data = json_graph.node_link_data(graph, edges='links')
+            (out / 'graph.json').write_text(json.dumps(data), encoding='utf-8')
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                query_graph('ArtifactLink', directory=tempdir)
+
+        self.assertIn('predates Tree-sitter symbol extraction', stdout.getvalue())
 
 
 if __name__ == '__main__':

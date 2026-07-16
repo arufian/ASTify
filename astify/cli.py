@@ -1,9 +1,22 @@
 #!/usr/bin/env python3
-"""ASTify CLI — embedding-based knowledge graph extraction, zero AI tokens."""
+"""ASTify CLI — AST + embedding knowledge graphs, zero AI tokens."""
 import argparse
 import json
 import sys
 from pathlib import Path
+
+
+COMMANDS = {
+    'run', 'detect', 'extract', 'build', 'report', 'html', 'query', 'path',
+    'explain',
+}
+
+
+def _normalize_argv(argv: list[str]) -> list[str]:
+    """Treat a bare directory argument as the advertised full pipeline."""
+    if argv and argv[0] not in COMMANDS and not argv[0].startswith('-'):
+        return ['run', *argv]
+    return argv
 
 
 def cmd_detect(args):
@@ -106,12 +119,31 @@ def cmd_html(args):
     export_html(args.directory, quiet=args.quiet)
 
 
+def cmd_run(args):
+    """Run detect → extract → build → report → HTML."""
+    cmd_detect(args)
+    cmd_extract(args)
+    cmd_build(args)
+    cmd_report(args)
+    cmd_html(args)
+
+
 def main():
     parser = argparse.ArgumentParser(
-        description='ASTify — embedding-based knowledge graph tool (zero AI tokens)',
+        description='ASTify — AST + embedding knowledge graphs (zero AI tokens)',
     )
-    parser.add_argument('--version', action='version', version='astify 0.1.0')
+    parser.add_argument('--version', action='version', version='astify 0.2.0')
     sub = parser.add_subparsers(dest='command', help='Commands')
+
+    # full pipeline
+    p = sub.add_parser('run', help='Run full detect/extract/build/report/html pipeline')
+    p.add_argument('directory', nargs='?', default='.', help='Directory to scan')
+    p.add_argument('-m', '--model', default='all-MiniLM-L6-v2',
+                   help='Sentence-transformer model')
+    p.add_argument('-t', '--threshold', type=float, default=0.72,
+                   help='Cosine similarity threshold')
+    p.add_argument('-q', '--quiet', action='store_true')
+    p.set_defaults(output=None, graphify_path=None)
 
     # detect
     p = sub.add_parser('detect', help='Detect and summarize files in directory')
@@ -177,13 +209,14 @@ def main():
                    help='Directory with astify-out/')
     p.add_argument('-q', '--quiet', action='store_true')
 
-    args = parser.parse_args()
+    args = parser.parse_args(_normalize_argv(sys.argv[1:]))
 
     if not args.command:
         parser.print_help()
         return
 
     cmds = {
+        'run': cmd_run,
         'detect': cmd_detect,
         'extract': cmd_extract,
         'build': cmd_build,

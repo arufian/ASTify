@@ -402,7 +402,9 @@ def run_extraction(
         if verbose:
             print('No readable text or PDF files found.')
         return {'nodes': [], 'edges': [], 'hyperedges': [],
-                'input_tokens': 0, 'output_tokens': 0}
+                'input_tokens': 0, 'output_tokens': 0,
+                'schema_version': 2,
+                'structural_parser': 'tree-sitter'}
 
     if verbose:
         print(f'Found {len(files)} readable files')
@@ -430,7 +432,9 @@ def run_extraction(
         if verbose:
             print('No readable content found.')
         return {'nodes': [], 'edges': [], 'hyperedges': [],
-                'input_tokens': 0, 'output_tokens': 0}
+                'input_tokens': 0, 'output_tokens': 0,
+                'schema_version': 2,
+                'structural_parser': 'tree-sitter'}
 
     # Step 3: Load models
     if verbose:
@@ -494,7 +498,16 @@ def run_extraction(
     )
     nodes.extend(symbol_nodes)
     if verbose:
-        print(f'  {len(nodes)} nodes ({len(symbol_nodes)} code symbols)')
+        ast_symbols = sum(
+            node.get('parser') == 'tree-sitter' for node in symbol_nodes
+        )
+        heuristic_symbols = sum(
+            node.get('parser') == 'heuristic' for node in symbol_nodes
+        )
+        print(
+            f'  {len(nodes)} nodes ({ast_symbols} AST symbols, '
+            f'{heuristic_symbols} heuristic symbols)'
+        )
 
     # Step 8: Build edges
     if verbose:
@@ -520,6 +533,8 @@ def run_extraction(
         'hyperedges': hyperedges,
         'input_tokens': 0,
         'output_tokens': 0,
+        'schema_version': 2,
+        'structural_parser': 'tree-sitter',
     }
 
     if verbose:

@@ -1,11 +1,13 @@
 ---
 name: ASTify
-description: "MUST use BEFORE any codebase exploration (Grep/Glob/Read/Explore) when astify-out/ exists — for questions AND for edit/fix/feature/refactor tasks that need locating or understanding code first. Also for any question about a codebase, its architecture, file relationships, or project content. Turns source code, metadata, config, documents, and PDFs into a queryable knowledge graph using local embeddings (zero AI tokens). Supports extract, build, query, path, and explain."
+description: "Use for codebase topic discovery and for symbol/call navigation when an ASTify schema-v2 graph exists. Tree-sitter provides exact Apex, JavaScript, TypeScript, and TSX structure; other code uses clearly labeled heuristic extraction, while metadata/docs use inferred local embeddings. Query once, then fall back promptly to source search when structural matches are absent. Supports extract, build, query, path, and explain."
 ---
 
 # /astify
 
-Turn any folder of readable files into a navigable knowledge graph using deterministic code-symbol extraction plus local embeddings — no API keys, no token costs. Produces graph.json, GRAPH_REPORT.md, and interactive HTML.
+Turn any folder of readable files into a navigable knowledge graph using
+Tree-sitter code ASTs plus local embeddings — no API keys, no AI-token costs.
+Produces graph.json, GRAPH_REPORT.md, and interactive HTML.
 
 ## Usage
 
@@ -22,11 +24,24 @@ Turn any folder of readable files into a navigable knowledge graph using determi
 
 ## What ASTify is for
 
-Drop any folder of source code, XML, YAML, metadata, docs, or PDFs into ASTify and get a queryable knowledge graph. Unknown extensions and extensionless readable text are supported. Persistent across sessions. Community detection surfaces cross-file connections. Zero AI tokens — all local CPU computation.
+Drop any folder of source code, XML, YAML, metadata, docs, or PDFs into ASTify
+and get a queryable knowledge graph. Apex, JavaScript, TypeScript, and TSX use
+real Tree-sitter AST extraction. Other code uses `HEURISTIC` syntax extraction;
+metadata and documents use `INFERRED` local embeddings/NLP. Unknown extensions
+and extensionless readable text remain supported for coarse semantic discovery.
 
 ## What You Must Do When Invoked
 
-**Fast path — existing graph:** Before doing anything else, check whether `astify-out/graph.json` exists. If it does AND the user's request is a natural-language question about the codebase (e.g. "How does X work?", "What connects to Y?"): **skip Steps 1–4 entirely and jump straight to `## For /astify query`.** Run `astify query "<question>"` immediately. Do not ask the user to confirm.
+**Fast path — existing graph:** Before broad codebase exploration, check whether
+`astify-out/graph.json` exists. If it does and the request concerns codebase
+topics or symbols, jump to `## For /astify query` and run one query.
+
+- If query warns graph predates Tree-sitter schema v2, do not trust it for exact
+  code navigation. Fall back to `rg` and recommend rebuilding.
+- If exact question returns no direct `symbol` matches or only `INFERRED`
+  concept edges, fall back immediately to `rg`/source reading.
+- Never present embedding similarity as proof of a definition, call, mutation,
+  or exact source line.
 
 If no path was given, use `.` (current directory).
 
@@ -71,7 +86,11 @@ If no readable files found: "No supported files found in [path]." and stop.
 astify extract <path>
 ```
 
-This runs deterministic code-symbol and source-line extraction, sentence-transformer embeddings, KeyBERT keyword extraction, spaCy NER, cross-file cosine similarity, and co-occurrence analysis. Structural edges are `EXTRACTED`; embedding and NLP edges are `INFERRED`. All local CPU — zero tokens.
+This runs Tree-sitter AST extraction for Apex/JavaScript/TypeScript/TSX,
+heuristic extraction for other code, sentence-transformer embeddings, KeyBERT,
+spaCy NER, cross-file cosine similarity, and co-occurrence analysis. AST edges
+are `EXTRACTED`; fallback syntax edges are `HEURISTIC`; embedding/NLP edges are
+`INFERRED`. All local CPU — zero AI tokens.
 
 ### Step 4 — Build graph, cluster, analyze
 
@@ -125,6 +144,15 @@ When `astify-out/graph.json` already exists and the user asks a question, answer
 ```bash
 astify query "<question>"
 ```
+
+Inspect output confidence:
+
+- `EXTRACTED` + `symbol` + source location: safe structural evidence.
+- `HEURISTIC`: useful lead, verify in source.
+- `INFERRED` concept-only result: coarse topic signal, not exact code evidence.
+
+For exact questions, fall back to `rg` after one inconclusive query. Do not spend
+multiple graph round trips trying to force an embedding result.
 
 For deep traversal:
 ```bash

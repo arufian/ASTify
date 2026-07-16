@@ -31,18 +31,18 @@ class SymbolExtractionTests(unittest.TestCase):
         by_label = {node['label']: node for node in nodes}
         self.assertEqual(by_label['attachArtifact']['symbol_kind'], 'method')
         self.assertEqual(by_label['attachArtifact']['source_location'], 'line 2')
-        self.assertEqual(by_label['new ArtifactLink']['source_location'], 'line 3')
+        self.assertEqual(by_label['new ArtifactLink']['source_location'], 'line 3:29')
         self.assertEqual(
-            by_label['TargetEntityId assignment']['source_location'], 'line 4'
+            by_label['TargetEntityId assignment']['source_location'], 'line 4:13'
         )
 
         structural = {
             (edge['relation'], edge['source_location'], edge['confidence'])
             for edge in edges
         }
-        self.assertIn(('instantiates', 'line 3', 'EXTRACTED'), structural)
-        self.assertIn(('assigns', 'line 4', 'EXTRACTED'), structural)
-        self.assertIn(('calls', 'line 6', 'EXTRACTED'), structural)
+        self.assertIn(('instantiates', 'line 3:29', 'EXTRACTED'), structural)
+        self.assertIn(('assigns', 'line 4:13', 'EXTRACTED'), structural)
+        self.assertIn(('calls', 'line 6:9', 'EXTRACTED'), structural)
 
     def test_does_not_treat_equality_as_assignment(self):
         with tempfile.TemporaryDirectory() as tempdir:
@@ -94,7 +94,7 @@ class SymbolExtractionTests(unittest.TestCase):
 
         labels = {node['label'] for node in nodes}
         self.assertIn('visibleCall', labels)
-        self.assertIn('RealDependency', labels)
+        self.assertIn('call RealDependency.run', labels)
         self.assertNotIn('HiddenCommentSymbol', labels)
         self.assertNotIn('HiddenStringSymbol', labels)
         self.assertNotIn('VendorThing', labels)
