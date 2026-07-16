@@ -27,6 +27,7 @@ def build_from_semantic(semantic: dict, root: str = '.') -> tuple[dict, dict]:
             'file_type': node.get('file_type', 'concept'),
             'source_file': node.get('source_file', ''),
             'source_location': node.get('source_location'),
+            'symbol_kind': node.get('symbol_kind'),
             'community': -1,
         }
 
@@ -39,7 +40,9 @@ def build_from_semantic(semantic: dict, root: str = '.') -> tuple[dict, dict]:
         conf = edge.get('confidence', 'INFERRED')
         score = edge.get('confidence_score', 0.75)
         G.add_edge(src, tgt, relation=rel, confidence=conf,
-                   confidence_score=score)
+                   confidence_score=score,
+                   source_file=edge.get('source_file', ''),
+                   source_location=edge.get('source_location'))
 
     # Community detection (Louvain)
     communities = {}
@@ -136,6 +139,8 @@ def build_from_semantic(semantic: dict, root: str = '.') -> tuple[dict, dict]:
                 'relation': G[u][v].get('relation', 'relates_to'),
                 'confidence': G[u][v].get('confidence', 'INFERRED'),
                 'confidence_score': G[u][v].get('confidence_score', 0.75),
+                'source_file': G[u][v].get('source_file', ''),
+                'source_location': G[u][v].get('source_location'),
             }
             for u, v in G.edges()
         ],

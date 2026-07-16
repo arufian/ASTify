@@ -2,7 +2,18 @@
 import json
 import re
 from pathlib import Path
-from collections import Counter
+
+
+STOPWORDS = {
+    'about', 'after', 'also', 'and', 'are', 'before', 'between', 'but', 'can',
+    'created', 'creates', 'creating', 'does', 'exact', 'file', 'find', 'for',
+    'from', 'how', 'into', 'line', 'lines', 'of', 'on', 'or', 'show', 'that',
+    'the', 'this', 'through', 'to', 'using', 'what', 'when', 'where', 'which',
+    'who', 'why', 'with',
+}
+STRUCTURAL_RELATIONS = {
+    'defines', 'calls', 'instantiates', 'assigns', 'references',
+}
 
 
 def _load_graph(directory: str) -> tuple:
@@ -24,54 +35,133 @@ def _load_graph(directory: str) -> tuple:
     return G, root
 
 
+def _text_tokens(text: str) -> list[str]:
+    """Tokenize natural language plus snake_case and CamelCase identifiers."""
+    found = []
+    seen = set()
+    for token in re.findall(r'[^\W\d][\w]*', text, re.UNICODE):
+        variants = [token]
+        variants.extend(part for part in token.split('_') if part)
+        variants.extend(
+            re.findall(
+                r'[A-Z]+(?=[A-Z][a-z])|[A-Z]?[a-z]+|[A-Z]+|\d+',
+                token,
+            )
+        )
+        for variant in variants:
+            normalized = variant.lower()
+            if (
+                3 <= len(normalized) <= 80
+                and normalized not in STOPWORDS
+                and normalized not in seen
+            ):
+                seen.add(normalized)
+                found.append(normalized)
+    return found
+
+
+def _node_search_text(ndata: dict) -> str:
+    return ' '.join(str(ndata.get(key, '') or '') for key in (
+        'label', 'source_file', 'symbol_kind',
+    ))
+
+
 def _build_vocab(G) -> list[str]:
-    """Extract vocabulary tokens from node labels."""
+    """Extract searchable vocabulary from labels, paths, and symbol metadata."""
     vocab = set()
-    for nid, ndata in G.nodes(data=True):
-        label = ndata.get('label', '') or ''
-        for token in re.findall(r'[^\W\d_]+', label, re.UNICODE):
-            parts = re.findall(r'[A-Z]+(?=[A-Z][a-z])|[A-Z]?[a-z]+|[A-Z]+',
-                               token) or [token]
-            for p in parts:
-                t = p.lower()
-                if 3 <= len(t) <= 30:
-                    vocab.add(t)
+    for _, ndata in G.nodes(data=True):
+        vocab.update(_text_tokens(_node_search_text(ndata)))
     return sorted(vocab)
 
 
-def _find_start_nodes(G, terms: list[str], top_k: int = 3) -> list:
+def _expand_query_terms(G, question: str) -> list[str]:
+    vocab = set(_build_vocab(G))
+    matched = []
+    seen = set()
+    for raw_token in re.findall(r'[^\W\d][\w]*', question, re.UNICODE):
+        variants = _text_tokens(raw_token)
+        if not variants:
+            continue
+        whole = raw_token.lower()
+        candidates = [whole] if whole in vocab else variants
+        for term in candidates:
+            if term in vocab and term not in seen:
+                seen.add(term)
+                matched.append(term)
+    return matched
+
+
+def _find_start_nodes(G, terms: list[str], top_k: int = 8,
+                      question: str = '') -> list:
+    question_lower = question.lower()
+    creation_intent = any(
+        word in question_lower
+        for word in ('create', 'creates', 'created', 'creating', 'new', 'instantiate')
+    )
     scored = []
     for nid, ndata in G.nodes(data=True):
         label = (ndata.get('label', '') or '').lower()
-        score = sum(1 for t in terms if t.lower() in label)
+        source = (ndata.get('source_file', '') or '').lower()
+        label_tokens = set(_text_tokens(ndata.get('label', '') or ''))
+        matched = [term for term in terms if term in label or term in source]
+        score = 0
+        for term in matched:
+            if term in label_tokens:
+                score += 10
+            elif term in label:
+                score += 6
+            if term in source:
+                score += 2
+        score += len(set(matched)) * 4
+        if matched and ndata.get('file_type') == 'symbol':
+            score += 8
+        if matched and ndata.get('source_location'):
+            score += 2
+        if creation_intent and ndata.get('symbol_kind') == 'constructor_call':
+            score += 20
         if score > 0:
             scored.append((score, nid))
-    scored.sort(reverse=True)
+    scored.sort(key=lambda item: (-item[0], str(item[1])))
     return [nid for _, nid in scored[:top_k]]
+
+
+def _edge_priority(edge: dict) -> tuple:
+    relation = edge.get('relation', '')
+    confidence = edge.get('confidence', '')
+    return (
+        0 if confidence == 'EXTRACTED' else 1,
+        0 if relation in STRUCTURAL_RELATIONS else 1,
+        relation,
+    )
 
 
 def query_graph(question: str, mode: str = 'bfs', budget: int = 2000,
                 directory: str = '.', quiet: bool = False):
     G, root = _load_graph(directory)
-    vocab = _build_vocab(G)
-
-    terms = [t for t in question.lower().split() if len(t) >= 3]
-    matched = [t for t in terms if t in vocab]
+    matched = _expand_query_terms(G, question)
     if not matched:
-        print('No vocabulary match. Available terms:', vocab[:20], '...')
+        print('No vocabulary match. Available terms:', _build_vocab(G)[:20], '...')
         return
 
     if not quiet:
         print(f'Query expanded: {matched}')
 
-    start_nodes = _find_start_nodes(G, matched)
+    start_nodes = _find_start_nodes(G, matched, question=question)
 
     if not start_nodes:
         print('No matching nodes found.')
         return
 
-    subgraph_nodes = set()
+    subgraph_nodes = set(start_nodes)
+    ordered_nodes = list(start_nodes)
     subgraph_edges = []
+    seen_edges = set()
+
+    def remember_edge(source, target):
+        key = tuple(sorted((str(source), str(target))))
+        if key not in seen_edges:
+            seen_edges.add(key)
+            subgraph_edges.append((source, target))
 
     if mode == 'dfs':
         visited = set()
@@ -81,35 +171,60 @@ def query_graph(question: str, mode: str = 'bfs', budget: int = 2000,
             if node in visited or depth > 6:
                 continue
             visited.add(node)
-            subgraph_nodes.add(node)
-            for neighbor in G.neighbors(node):
+            if node not in subgraph_nodes:
+                subgraph_nodes.add(node)
+                ordered_nodes.append(node)
+            neighbors = sorted(
+                G.neighbors(node),
+                key=lambda neighbor: _edge_priority(G[node][neighbor]),
+            )
+            for neighbor in neighbors[:20]:
+                if neighbor in subgraph_nodes:
+                    remember_edge(node, neighbor)
                 if neighbor not in visited:
                     stack.append((neighbor, depth + 1))
-                    subgraph_edges.append((node, neighbor))
+                    remember_edge(node, neighbor)
     else:
-        frontier = set(start_nodes)
-        subgraph_nodes = set(start_nodes)
-        for _ in range(3):
-            next_frontier = set()
+        frontier = list(start_nodes)
+        for _ in range(2):
+            next_frontier = []
             for n in frontier:
-                for neighbor in G.neighbors(n):
+                neighbors = sorted(
+                    G.neighbors(n),
+                    key=lambda neighbor: _edge_priority(G[n][neighbor]),
+                )
+                for neighbor in neighbors[:20]:
+                    if neighbor in subgraph_nodes:
+                        remember_edge(n, neighbor)
                     if neighbor not in subgraph_nodes:
-                        next_frontier.add(neighbor)
-                        subgraph_edges.append((n, neighbor))
-            subgraph_nodes.update(next_frontier)
+                        next_frontier.append(neighbor)
+                        ordered_nodes.append(neighbor)
+                        subgraph_nodes.add(neighbor)
+                        remember_edge(n, neighbor)
             frontier = next_frontier
+            if len(subgraph_nodes) >= 60:
+                break
 
     char_budget = budget * 4
     lines = [f'Traversal: {mode.upper()} | {len(subgraph_nodes)} nodes']
-    for nid in list(subgraph_nodes)[:30]:
+    lines.append('Direct matches:')
+    for nid in start_nodes:
         d = G.nodes[nid]
+        location = f' loc={d.get("source_location")}' if d.get('source_location') else ''
         lines.append(f'  {d.get("label", nid)} [{d.get("file_type","")}'
-                     f' src={d.get("source_file","")}]')
+                     f' src={d.get("source_file","")}{location}]')
+    lines.append('Traversal nodes:')
+    for nid in ordered_nodes[:30]:
+        d = G.nodes[nid]
+        location = f' loc={d.get("source_location")}' if d.get('source_location') else ''
+        lines.append(f'  {d.get("label", nid)} [{d.get("file_type","")}'
+                     f' src={d.get("source_file","")}{location}]')
     for u, v in subgraph_edges[:50]:
         edge = G[u][v]
+        location = f' at {edge.get("source_location")}' if edge.get('source_location') else ''
         lines.append(f'  {G.nodes[u].get("label",u)}'
                      f' --{edge.get("relation","")}'
-                     f' [{edge.get("confidence","")}]-->'
+                     f' [{edge.get("confidence","")}{location}]-->'
                      f' {G.nodes[v].get("label",v)}')
 
     output = '\n'.join(lines)
@@ -184,6 +299,8 @@ def explain_node(node: str, directory: str = '.', quiet: bool = False):
     print(f'NODE: {ndata.get("label", nid)}')
     print(f'  type: {ndata.get("file_type", "unknown")}')
     print(f'  source: {ndata.get("source_file", "")}')
+    if ndata.get('source_location'):
+        print(f'  location: {ndata["source_location"]}')
     print(f'  degree: {G.degree(nid)}')
     print(f'  community: {ndata.get("community", -1)}')
     print()

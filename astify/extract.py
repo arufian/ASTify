@@ -6,7 +6,9 @@ from collections import defaultdict
 import numpy as np
 import yaml
 
-from astify.detect import CODE_EXTS, CODE_FILENAMES
+from astify.detect import CODE_EXTS, CODE_FILENAMES, SYMBOL_CODE_EXTS
+from astify.identifiers import normalize_id, stem_from_path
+from astify.symbols import extract_code_symbols
 
 
 def read_frontmatter(text: str) -> tuple[dict, str]:
@@ -45,25 +47,6 @@ def read_file_text(filepath: Path) -> str:
         return data.decode('utf-8-sig', errors='replace')
     except OSError:
         return ''
-
-
-def normalize_id(text: str) -> str:
-    """Normalize string to ASTify node ID: [a-z0-9_]."""
-    text = text.lower().strip()
-    text = re.sub(r'[^a-z0-9\s]', '', text)
-    text = re.sub(r'\s+', '_', text)
-    return text[:80]
-
-
-def stem_from_path(filepath: Path, root: Path) -> str:
-    """Build node ID stem: {parent_dir}_{filename_without_ext}."""
-    rel = filepath.relative_to(root)
-    parts = rel.parts
-    fname_stem = normalize_id(filepath.stem)
-    if len(parts) > 1:
-        parent = normalize_id(parts[-2])
-        return f'{parent}_{fname_stem}'
-    return fname_stem
 
 
 def detect_files(root: Path) -> list[Path]:
@@ -501,8 +484,17 @@ def run_extraction(
         print('Building nodes...')
     nodes = build_nodes(files, root, keywords_by_file,
                         entities_by_file, frontmatter_by_file)
+    symbol_nodes, structural_edges = extract_code_symbols(
+        [fp for fp in files if (
+            fp.suffix.lower() in SYMBOL_CODE_EXTS
+            or fp.name.lower() in CODE_FILENAMES
+        )],
+        root,
+        texts,
+    )
+    nodes.extend(symbol_nodes)
     if verbose:
-        print(f'  {len(nodes)} nodes')
+        print(f'  {len(nodes)} nodes ({len(symbol_nodes)} code symbols)')
 
     # Step 8: Build edges
     if verbose:
@@ -510,8 +502,9 @@ def run_extraction(
     edges = build_edges(files, root, embeddings,
                         keywords_by_file, entities_by_file, texts,
                         sim_threshold=sim_threshold)
+    edges.extend(structural_edges)
     if verbose:
-        print(f'  {len(edges)} edges')
+        print(f'  {len(edges)} edges ({len(structural_edges)} structural)')
 
     # Step 9: Build hyperedges
     if verbose:

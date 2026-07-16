@@ -21,6 +21,11 @@ CODE_FILENAMES = {
     'dockerfile', 'makefile', 'rakefile', 'gemfile', 'procfile', 'justfile',
     'jenkinsfile', 'vagrantfile', 'cmakelists.txt',
 }
+NON_PROGRAMMING_CODE_EXTS = {
+    '.cfg', '.conf', '.ini', '.json', '.properties', '.toml', '.xml', '.yaml',
+    '.yml',
+}
+SYMBOL_CODE_EXTS = CODE_EXTS - NON_PROGRAMMING_CODE_EXTS
 SKIP_PARTS = {'node_modules', '__pycache__', '.git', '.svn', 'venv', '.venv',
               'astify-out', 'graphify-out', 'dist', 'build', '.tox', '.eggs'}
 

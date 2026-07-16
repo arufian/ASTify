@@ -5,7 +5,7 @@ description: "MUST use BEFORE any codebase exploration (Grep/Glob/Read/Explore) 
 
 # /astify
 
-Turn any folder of readable files into a navigable knowledge graph using local embeddings — no API keys, no token costs. Produces graph.json, GRAPH_REPORT.md, and interactive HTML.
+Turn any folder of readable files into a navigable knowledge graph using deterministic code-symbol extraction plus local embeddings — no API keys, no token costs. Produces graph.json, GRAPH_REPORT.md, and interactive HTML.
 
 ## Usage
 
@@ -71,7 +71,7 @@ If no readable files found: "No supported files found in [path]." and stop.
 astify extract <path>
 ```
 
-This runs: sentence-transformer embeddings, KeyBERT keyword extraction, spaCy NER, cross-file cosine similarity, and co-occurrence analysis. All local CPU — zero tokens.
+This runs deterministic code-symbol and source-line extraction, sentence-transformer embeddings, KeyBERT keyword extraction, spaCy NER, cross-file cosine similarity, and co-occurrence analysis. Structural edges are `EXTRACTED`; embedding and NLP edges are `INFERRED`. All local CPU — zero tokens.
 
 ### Step 4 — Build graph, cluster, analyze
 

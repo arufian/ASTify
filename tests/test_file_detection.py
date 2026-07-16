@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from astify.detect import detect_all, detect_content_files
+from astify.detect import SYMBOL_CODE_EXTS, detect_all, detect_content_files
 from astify.extract import build_nodes, detect_files
 
 
@@ -76,6 +76,11 @@ class FileDetectionTests(unittest.TestCase):
             'Sample_Component.config-meta.xml',
         )
         self.assertEqual(nodes[0]['file_type'], 'code')
+
+    def test_metadata_formats_are_not_programming_symbol_inputs(self):
+        self.assertNotIn('.xml', SYMBOL_CODE_EXTS)
+        self.assertNotIn('.yaml', SYMBOL_CODE_EXTS)
+        self.assertIn('.cls', SYMBOL_CODE_EXTS)
 
 
 if __name__ == '__main__':

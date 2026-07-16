@@ -44,6 +44,7 @@ astify explain "AuthService"
 ```
 Readable files (source code, XML, YAML, docs, PDFs, any text extension)
     │
+    ├─► deterministic syntax scan → symbols + EXTRACTED structural edges
     ├─► sentence-transformers → embeddings → cosine similarity edges
     ├─► KeyBERT → keyword extraction → concept nodes
     ├─► spaCy NER → named entity nodes
@@ -61,6 +62,15 @@ and extensionless files are included when their content is readable text.
 Binary files, hidden paths, dependencies, build outputs, and ASTify/Graphify
 output directories are skipped.
 
+Programming source files using common declaration syntax also receive
+deterministic class, method, call, constructor, and assignment nodes with line
+locations. Structural `defines`, `calls`,
+`instantiates`, `assigns`, and `references` edges are marked `EXTRACTED`.
+Identifier-aware query expansion preserves CamelCase and snake_case symbols,
+while structural matches rank ahead of embedding-only concepts.
+Minified/generated bundles and identifiers found only inside comments or string
+literals are excluded from structural extraction.
+
 ```
 astify-out/
 ├── .semantic.json    # raw extraction (Graphify-compatible)
@@ -74,7 +84,7 @@ astify-out/
 
 | Edge Type | Graphify (LLM) | ASTify (embeddings) |
 |-----------|---------------|---------------------|
-| `calls` | AST | N/A (code-focused) |
+| `defines`, `calls`, `instantiates`, `assigns` | AST | Deterministic syntax scan |
 | `conceptually_related_to` | LLM | KeyBERT keywords |
 | `references` | LLM | spaCy NER + co-occurrence |
 | `semantically_similar_to` | LLM | Cosine similarity |
