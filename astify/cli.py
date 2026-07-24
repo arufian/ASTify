@@ -38,29 +38,51 @@ def cmd_detect(args):
 
 def cmd_extract(args):
     from astify.extract import run_extraction
+    from astify.storage import save_semantic
 
     result = run_extraction(
         directory=args.directory,
         model_name=args.model,
         sim_threshold=args.threshold,
+        max_similarity_neighbors=args.max_neighbors,
+        batch_size=args.batch_size,
         verbose=not args.quiet,
     )
+
+    root = Path(args.directory).resolve()
+    database_path = root / 'astify-out' / 'astify.db'
+    if not args.quiet:
+        print('Writing SQLite extraction store...', flush=True)
+    save_semantic(database_path, result)
+    for stale_name in (
+        'graph.json',
+        'graph-summary.json',
+        'analysis.json',
+        'GRAPH_REPORT.md',
+        'graph.html',
+    ):
+        (database_path.parent / stale_name).unlink(missing_ok=True)
+    if not args.quiet:
+        print(f'Saved: {database_path}', flush=True)
 
     if args.graphify_path:
         out_path = Path(args.graphify_path)
     elif args.output:
         out_path = Path(args.output)
-    else:
-        root = Path(args.directory).resolve()
+    elif args.json:
         out_path = root / 'astify-out' / '.semantic.json'
+    else:
+        out_path = None
 
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(
-        json.dumps(result, indent=2, ensure_ascii=False),
-        encoding='utf-8',
-    )
+    if out_path is not None:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(
+            json.dumps(result, indent=2, ensure_ascii=False),
+            encoding='utf-8',
+        )
     if not args.quiet:
-        print(f'Saved: {out_path}')
+        if out_path is not None:
+            print(f'Saved: {out_path}')
         n = len(result['nodes'])
         e = len(result['edges'])
         print(f'{n} nodes, {e} edges | 0 tokens')
@@ -69,20 +91,27 @@ def cmd_extract(args):
 
 def cmd_build(args):
     from astify.build import build_graph
+    from astify.storage import load_semantic
 
-    sem_path = Path(args.directory).resolve() / 'astify-out' / '.semantic.json'
-    if not sem_path.exists():
-        print(f'ERROR: No extraction found at {sem_path}')
+    out_dir = Path(args.directory).resolve() / 'astify-out'
+    database_path = out_dir / 'astify.db'
+    sem_path = out_dir / '.semantic.json'
+    if database_path.exists():
+        semantic = load_semantic(database_path)
+    elif sem_path.exists():
+        with open(sem_path, encoding='utf-8') as file:
+            semantic = json.load(file)
+    else:
+        print(f'ERROR: No extraction found in {out_dir}')
         print('Run `astify extract` first.')
         raise SystemExit(1)
-
-    with open(sem_path, encoding='utf-8') as f:
-        semantic = json.load(f)
 
     graph = build_graph(
         directory=args.directory,
         semantic=semantic,
         quiet=args.quiet,
+        full_analysis=args.full_analysis,
+        full_json=args.full_json,
     )
     return graph
 
@@ -116,7 +145,11 @@ def cmd_report(args):
 def cmd_html(args):
     from astify.export import export_html
 
-    export_html(args.directory, quiet=args.quiet)
+    export_html(
+        args.directory,
+        quiet=args.quiet,
+        full_html=args.full_html,
+    )
 
 
 def cmd_run(args):
@@ -125,14 +158,15 @@ def cmd_run(args):
     cmd_extract(args)
     cmd_build(args)
     cmd_report(args)
-    cmd_html(args)
+    if not args.no_viz:
+        cmd_html(args)
 
 
 def main():
     parser = argparse.ArgumentParser(
         description='ASTify — AST + embedding knowledge graphs (zero AI tokens)',
     )
-    parser.add_argument('--version', action='version', version='astify 0.2.0')
+    parser.add_argument('--version', action='version', version='astify 0.3.0')
     sub = parser.add_subparsers(dest='command', help='Commands')
 
     # full pipeline
@@ -142,6 +176,20 @@ def main():
                    help='Sentence-transformer model')
     p.add_argument('-t', '--threshold', type=float, default=0.72,
                    help='Cosine similarity threshold')
+    p.add_argument('-k', '--max-neighbors', type=int, default=20,
+                   help='Maximum semantic neighbors per file')
+    p.add_argument('--batch-size', type=int, default=32,
+                   help='Embedding/NLP batch size')
+    p.add_argument('--full-analysis', action='store_true',
+                   help='Force exact betweenness analysis (may be very slow)')
+    p.add_argument('--full-json', action='store_true',
+                   help='Force full graph.json export for large graphs')
+    p.add_argument('--full-html', action='store_true',
+                   help='Force detailed HTML export for large graphs')
+    p.add_argument('--no-viz', action='store_true',
+                   help='Skip HTML visualization')
+    p.add_argument('--json', action='store_true',
+                   help='Also write legacy astify-out/.semantic.json')
     p.add_argument('-q', '--quiet', action='store_true')
     p.set_defaults(output=None, graphify_path=None)
 
@@ -159,16 +207,26 @@ def main():
                    help='Sentence-transformer model')
     p.add_argument('-t', '--threshold', type=float, default=0.72,
                    help='Cosine similarity threshold')
+    p.add_argument('-k', '--max-neighbors', type=int, default=20,
+                   help='Maximum semantic neighbors per file')
+    p.add_argument('--batch-size', type=int, default=32,
+                   help='Embedding/NLP batch size')
     p.add_argument('-o', '--output', default=None,
                    help='Output JSON path')
     p.add_argument('--graphify-path', default=None,
                    help='Output to Graphify-compatible path')
+    p.add_argument('--json', action='store_true',
+                   help='Also write legacy astify-out/.semantic.json')
     p.add_argument('-q', '--quiet', action='store_true')
 
     # build
     p = sub.add_parser('build', help='Build full knowledge graph from extraction')
     p.add_argument('directory', nargs='?', default='.',
-                   help='Directory with astify-out/.semantic.json')
+                   help='Directory with astify-out/astify.db or .semantic.json')
+    p.add_argument('--full-analysis', action='store_true',
+                   help='Force exact betweenness analysis (may be very slow)')
+    p.add_argument('--full-json', action='store_true',
+                   help='Force full graph.json export for large graphs')
     p.add_argument('-q', '--quiet', action='store_true')
 
     # report
@@ -181,6 +239,8 @@ def main():
     p = sub.add_parser('html', help='Generate interactive HTML graph')
     p.add_argument('directory', nargs='?', default='.',
                    help='Directory with astify-out/')
+    p.add_argument('--full-html', action='store_true',
+                   help='Force detailed HTML export for large graphs')
     p.add_argument('-q', '--quiet', action='store_true')
 
     # query

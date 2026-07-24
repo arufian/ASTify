@@ -20,6 +20,9 @@ def generate_report(directory: str, meta: dict, quiet: bool = False):
         '',
         f'**Nodes:** {meta.get("num_nodes", 0)}',
         f'**Edges:** {meta.get("num_edges", 0)}',
+        f'**Analysis graph:** {meta.get("analysis_nodes", meta.get("num_nodes", 0))} nodes / '
+        f'{meta.get("analysis_edges", meta.get("num_edges", 0))} edges',
+        f'**Analysis mode:** {meta.get("analysis_mode", "legacy")}',
         f'**Communities:** {meta.get("num_communities", 0)}',
         f'**Tokens:** {meta.get("input_tokens", 0)} input / {meta.get("output_tokens", 0)} output',
         '',
@@ -64,8 +67,9 @@ def generate_report(directory: str, meta: dict, quiet: bool = False):
     lines.append('')
     surprises = meta.get('surprises', [])
     for s in surprises:
+        metric = s.get('metric', 'betweenness')
         lines.append(f'- **{s["source"]}** ↔ **{s["target"]}** '
-                     f'(betweenness: {s["betweenness"]})')
+                     f'({metric}: {s["betweenness"]})')
     if not surprises:
         lines.append('*(none)*')
     lines.append('')

@@ -1,6 +1,6 @@
 [project]
 name = "astify"
-version = "0.2.0"
+version = "0.3.0"
 description = "ASTify — Tree-sitter AST and embedding knowledge graphs, zero AI tokens"
 requires-python = ">=3.10"
 dependencies = [

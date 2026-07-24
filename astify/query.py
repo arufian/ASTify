@@ -16,11 +16,17 @@ STRUCTURAL_RELATIONS = {
 }
 
 
-def _load_graph(directory: str) -> tuple:
+def _load_graph(directory: str, question: str | None = None) -> tuple:
     root = Path(directory).resolve()
     graph_path = root / 'astify-out' / 'graph.json'
+    database_path = root / 'astify-out' / 'astify.db'
+    database_has_graph = False
+    if database_path.exists():
+        from astify.storage import has_graph
 
-    if not graph_path.exists():
+        database_has_graph = has_graph(database_path)
+
+    if not graph_path.exists() and not database_has_graph:
         print('ERROR: No graph found. Run `astify extract .` then `astify build .` first.')
         raise SystemExit(1)
 
@@ -30,14 +36,24 @@ def _load_graph(directory: str) -> tuple:
     except ImportError:
         raise ImportError('networkx required. pip install networkx')
 
-    data = json.loads(graph_path.read_text(encoding='utf-8'))
-    graph_meta = data.get('graph', {})
+    if graph_path.exists():
+        data = json.loads(graph_path.read_text(encoding='utf-8'))
+        graph_meta = data.get('graph', {})
+        G = json_graph.node_link_graph(data, edges='links')
+    else:
+        from astify.storage import load_graph, load_graph_neighborhood
+
+        G = (
+            load_graph_neighborhood(database_path, question)
+            if question
+            else load_graph(database_path)
+        )
+        graph_meta = G.graph
     if graph_meta.get('schema_version', 1) < 2:
         print(
             'WARNING: Graph predates Tree-sitter symbol extraction. '
             'Run `astify extract .` then `astify build .` to rebuild it.'
         )
-    G = json_graph.node_link_graph(data, edges='links')
     return G, root
 
 
@@ -166,7 +182,7 @@ def _edge_priority(edge: dict) -> tuple:
 
 def query_graph(question: str, mode: str = 'bfs', budget: int = 2000,
                 directory: str = '.', quiet: bool = False):
-    G, root = _load_graph(directory)
+    G, root = _load_graph(directory, question=question)
     matched = _expand_query_terms(G, question)
     if not matched:
         print('No vocabulary match. Available terms:', _build_vocab(G)[:20], '...')

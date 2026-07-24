@@ -14,6 +14,8 @@ def _parse_args():
     directory = '.'
     model = 'all-MiniLM-L6-v2'
     threshold = 0.72
+    max_neighbors = 20
+    batch_size = 32
     output = None
     astify = None
     quiet = False
@@ -36,6 +38,18 @@ def _parse_args():
             except ValueError:
                 sys.exit(f'ERROR: {args[i]} expects a number')
             i += 1
+        elif args[i] in ('-k', '--max-neighbors'):
+            try:
+                max_neighbors = int(_value(i, args[i]))
+            except ValueError:
+                sys.exit(f'ERROR: {args[i]} expects an integer')
+            i += 1
+        elif args[i] == '--batch-size':
+            try:
+                batch_size = int(_value(i, args[i]))
+            except ValueError:
+                sys.exit(f'ERROR: {args[i]} expects an integer')
+            i += 1
         elif args[i] in ('-o', '--output'):
             output = _value(i, args[i])
             i += 1
@@ -50,16 +64,24 @@ def _parse_args():
             sys.exit(f'ERROR: unknown flag {args[i]}')
         i += 1
 
-    return directory, model, threshold, output, astify, quiet
+    return (
+        directory, model, threshold, max_neighbors, batch_size,
+        output, astify, quiet,
+    )
 
 
 if __name__ == '__main__':
-    directory, model, threshold, output, astify, quiet = _parse_args()
+    (
+        directory, model, threshold, max_neighbors, batch_size,
+        output, astify, quiet,
+    ) = _parse_args()
 
     result = run_extraction(
         directory=directory,
         model_name=model,
         sim_threshold=threshold,
+        max_similarity_neighbors=max_neighbors,
+        batch_size=batch_size,
         verbose=not quiet,
     )
 

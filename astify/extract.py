@@ -1,5 +1,6 @@
 import re
 import codecs
+import time
 from pathlib import Path
 from collections import defaultdict
 
@@ -9,6 +10,14 @@ import yaml
 from astify.detect import CODE_EXTS, CODE_FILENAMES, SYMBOL_CODE_EXTS
 from astify.identifiers import normalize_id, stem_from_path
 from astify.symbols import extract_code_symbols
+
+
+def keyword_node_id(keyword: str) -> str:
+    return f'concept_keyword_{normalize_id(keyword)}'
+
+
+def entity_node_id(entity: str, label: str) -> str:
+    return f'concept_entity_{normalize_id(label)}_{normalize_id(entity)}'
 
 
 def read_frontmatter(text: str) -> tuple[dict, str]:
@@ -70,43 +79,63 @@ def chunk_text(text: str, max_chars: int = 8000) -> list[str]:
 
 
 def extract_keybert_keywords(
-    kw_model, texts: dict[str, str]
+    kw_model, texts: dict[str, str], batch_size: int = 32,
 ) -> dict[str, list[tuple[str, float]]]:
     """Extract keywords per file via KeyBERT."""
     results = {}
+    eligible = [
+        (path_str, text[:10000])
+        for path_str, text in texts.items()
+        if len(text.strip()) >= 50
+    ]
     for path_str, text in texts.items():
         if len(text.strip()) < 50:
             results[path_str] = []
-            continue
+    for start in range(0, len(eligible), batch_size):
+        batch = eligible[start:start + batch_size]
         try:
-            kws = kw_model.extract_keywords(
-                text[:10000],
+            extracted = kw_model.extract_keywords(
+                [text for _, text in batch],
                 keyphrase_ngram_range=(1, 3),
                 stop_words='english',
                 top_n=12,
                 use_maxsum=False,
                 nr_candidates=20,
             )
-            results[path_str] = [(kw.strip(), float(score)) for kw, score in kws]
+            for (path_str, _), keywords in zip(batch, extracted):
+                results[path_str] = [
+                    (keyword.strip(), float(score))
+                    for keyword, score in keywords
+                ]
         except Exception:
-            results[path_str] = []
+            for path_str, _ in batch:
+                results[path_str] = []
     return results
 
 
 def extract_ner_entities(
-    nlp, texts: dict[str, str]
+    nlp, texts: dict[str, str], batch_size: int = 32,
 ) -> dict[str, list[tuple[str, str, float]]]:
     """Extract named entities per file via spaCy NER."""
     results = {}
     target_labels = {'ORG', 'PRODUCT', 'GPE', 'PERSON', 'WORK_OF_ART',
                      'LAW', 'EVENT', 'FAC', 'LOC'}
+    eligible = [
+        (path_str, text[:100000])
+        for path_str, text in texts.items()
+        if len(text.strip()) >= 100
+    ]
     for path_str, text in texts.items():
-        ents: list[tuple[str, str, float]] = []
         if len(text.strip()) < 100:
-            results[path_str] = ents
-            continue
+            results[path_str] = []
+    documents = nlp.pipe(
+        (text for _, text in eligible),
+        batch_size=batch_size,
+        n_process=1,
+    )
+    for (path_str, _), doc in zip(eligible, documents):
+        ents: list[tuple[str, str, float]] = []
         try:
-            doc = nlp(text[:100000])
             seen = set()
             for ent in doc.ents:
                 if ent.label_ not in target_labels:
@@ -162,9 +191,10 @@ def build_nodes(
                 'contributor': fm.get('contributor'),
             })
 
-        # Keyword concept nodes
+        # Canonical keyword concept hubs. Shared concepts stay O(files) instead
+        # of becoming O(files²) pairwise cliques.
         for kw, score in keywords_by_file.get(path_str, []):
-            node_id = f'{stem}_{normalize_id(kw)}'
+            node_id = keyword_node_id(kw)
             if node_id in seen_ids:
                 continue
             seen_ids.add(node_id)
@@ -172,7 +202,7 @@ def build_nodes(
                 'id': node_id,
                 'label': kw,
                 'file_type': 'concept',
-                'source_file': rel_str,
+                'source_file': '',
                 'source_location': None,
                 'source_url': fm.get('source_url'),
                 'captured_at': fm.get('captured_at'),
@@ -180,9 +210,9 @@ def build_nodes(
                 'contributor': fm.get('contributor'),
             })
 
-        # NER entity concept nodes
+        # Canonical NER concept hubs.
         for ent_text, ent_label, conf in entities_by_file.get(path_str, []):
-            node_id = f'{stem}_{normalize_id(ent_text)}'
+            node_id = entity_node_id(ent_text, ent_label)
             if node_id in seen_ids:
                 continue
             seen_ids.add(node_id)
@@ -190,7 +220,7 @@ def build_nodes(
                 'id': node_id,
                 'label': f'{ent_text} ({ent_label})',
                 'file_type': 'concept',
-                'source_file': rel_str,
+                'source_file': '',
                 'source_location': None,
                 'source_url': fm.get('source_url'),
                 'captured_at': fm.get('captured_at'),
@@ -201,6 +231,80 @@ def build_nodes(
     return nodes
 
 
+def _nearest_similarity_pairs(
+    path_list: list[str],
+    embeddings: dict[str, np.ndarray],
+    max_neighbors: int,
+    threshold: float,
+) -> list[tuple[int, int, float]]:
+    """Return bounded top-K cosine neighbors without an N×N matrix."""
+    valid_paths = [path for path in path_list if path in embeddings]
+    if len(valid_paths) < 2 or max_neighbors <= 0:
+        return []
+    matrix = np.asarray([embeddings[path] for path in valid_paths], dtype=np.float32)
+    norms = np.linalg.norm(matrix, axis=1, keepdims=True)
+    norms[norms == 0] = 1.0
+    matrix = matrix / norms
+    neighbor_count = min(max_neighbors + 1, len(valid_paths))
+    candidates: set[tuple[int, int]] = set()
+
+    try:
+        import hnswlib
+
+        index = hnswlib.Index(space='cosine', dim=matrix.shape[1])
+        index.init_index(
+            max_elements=len(valid_paths),
+            ef_construction=max(100, neighbor_count * 4),
+            M=16,
+        )
+        index.add_items(matrix, np.arange(len(valid_paths)))
+        index.set_ef(max(50, neighbor_count * 2))
+        labels, distances = index.knn_query(matrix, k=neighbor_count)
+        for source, (row_labels, row_distances) in enumerate(
+            zip(labels, distances)
+        ):
+            accepted = 0
+            for target, distance in zip(row_labels, row_distances):
+                target = int(target)
+                if source == target:
+                    continue
+                similarity = 1.0 - float(distance)
+                if similarity > threshold:
+                    candidates.add(tuple(sorted((source, target))))
+                    accepted += 1
+                    if accepted >= max_neighbors:
+                        break
+    except ImportError:
+        # Bounded-memory fallback. Each block computes B×N similarities, keeps
+        # only K candidates, then releases the block.
+        block_size = 256
+        for start in range(0, len(valid_paths), block_size):
+            scores = matrix[start:start + block_size] @ matrix.T
+            for offset, row in enumerate(scores):
+                source = start + offset
+                count = min(neighbor_count, len(row))
+                indices = np.argpartition(row, -count)[-count:]
+                accepted = 0
+                for target in indices[np.argsort(row[indices])[::-1]]:
+                    target = int(target)
+                    if source != target and float(row[target]) > threshold:
+                        candidates.add(tuple(sorted((source, target))))
+                        accepted += 1
+                        if accepted >= max_neighbors:
+                            break
+
+    path_index = {path: index for index, path in enumerate(path_list)}
+    valid_to_original = [path_index[path] for path in valid_paths]
+    return [
+        (
+            valid_to_original[source],
+            valid_to_original[target],
+            float(matrix[source] @ matrix[target]),
+        )
+        for source, target in sorted(candidates)
+    ]
+
+
 def build_edges(
     files: list[Path],
     root: Path,
@@ -209,10 +313,9 @@ def build_edges(
     entities_by_file: dict[str, list[tuple[str, str, float]]],
     texts: dict[str, str],
     sim_threshold: float = 0.72,
+    max_similarity_neighbors: int = 20,
 ) -> list[dict]:
-    """Build edges: file→keyword, file→entity, cross-file similarity, co-occurrence."""
-    from sklearn.metrics.pairwise import cosine_similarity
-
+    """Build bounded semantic edges around canonical concept hubs."""
     edges: list[dict] = []
     edge_keys: set[tuple[str, str, str]] = set()
 
@@ -242,7 +345,7 @@ def build_edges(
         stem = stem_from_path(fp, root)
         file_node_id = stem
         for kw, score in keywords_by_file.get(path_str, []):
-            kw_node_id = f'{stem}_{normalize_id(kw)}'
+            kw_node_id = keyword_node_id(kw)
             conf_score = max(0.5, min(0.95, score))
             add_edge(file_node_id, kw_node_id, 'conceptually_related_to',
                      'INFERRED', round(conf_score, 2), path_str)
@@ -253,69 +356,28 @@ def build_edges(
         stem = stem_from_path(fp, root)
         file_node_id = stem
         for ent_text, ent_label, conf in entities_by_file.get(path_str, []):
-            ent_node_id = f'{stem}_{normalize_id(ent_text)}'
+            ent_node_id = entity_node_id(ent_text, ent_label)
             add_edge(file_node_id, ent_node_id, 'references',
                      'INFERRED', round(conf, 2), path_str)
 
-    # Cross-file cosine similarity → semantically_similar_to
+    # Bounded top-K cross-file cosine similarity.
     path_list = [str(f) for f in files]
-    if len(path_list) >= 2 and embeddings:
-        emb_list = []
-        valid_paths = []
-        for p in path_list:
-            if p in embeddings:
-                emb_list.append(embeddings[p])
-                valid_paths.append(p)
-        if len(emb_list) >= 2:
-            emb_matrix = np.array(emb_list)
-            sim_matrix = cosine_similarity(emb_matrix)
-            for i in range(len(valid_paths)):
-                for j in range(i + 1, len(valid_paths)):
-                    sim = float(sim_matrix[i][j])
-                    if sim > sim_threshold:
-                        fp_i = Path(valid_paths[i])
-                        fp_j = Path(valid_paths[j])
-                        stem_i = stem_from_path(fp_i, root)
-                        stem_j = stem_from_path(fp_j, root)
-                        add_edge(stem_i, stem_j, 'semantically_similar_to',
-                                 'INFERRED', round(max(0.55, sim), 2),
-                                 valid_paths[i])
-
-    # Co-occurrence: shared keywords across files → references edges
-    kw_map: dict[str, list[tuple[Path, str, float]]] = {}
-    for fp in files:
-        path_str = str(fp)
-        stem = stem_from_path(fp, root)
-        for kw, score in keywords_by_file.get(path_str, []):
-            kw_norm = normalize_id(kw)
-            kw_map.setdefault(kw_norm, []).append((fp, f'{stem}_{kw_norm}', score))
-    for kw_norm, refs in kw_map.items():
-        if len(refs) >= 2:
-            for i in range(len(refs)):
-                for j in range(i + 1, len(refs)):
-                    fp_a, node_a, score_a = refs[i]
-                    fp_b, node_b, score_b = refs[j]
-                    avg_score = (score_a + score_b) / 2
-                    add_edge(node_a, node_b, 'references',
-                             'INFERRED', round(max(0.5, avg_score), 2),
-                             str(fp_a))
-
-    # Co-occurrence: shared NER entities across files
-    ent_map: dict[str, list[tuple[Path, str]]] = {}
-    for fp in files:
-        path_str = str(fp)
-        stem = stem_from_path(fp, root)
-        for ent_text, ent_label, conf in entities_by_file.get(path_str, []):
-            ent_norm = normalize_id(ent_text)
-            ent_map.setdefault(ent_norm, []).append((fp, f'{stem}_{ent_norm}'))
-    for ent_norm, refs in ent_map.items():
-        if len(refs) >= 2:
-            for i in range(len(refs)):
-                for j in range(i + 1, len(refs)):
-                    fp_a, node_a = refs[i]
-                    fp_b, node_b = refs[j]
-                    add_edge(node_a, node_b, 'references',
-                             'INFERRED', 0.75, str(fp_a))
+    for source, target, similarity in _nearest_similarity_pairs(
+        path_list,
+        embeddings,
+        max_similarity_neighbors,
+        sim_threshold,
+    ):
+        source_path = Path(path_list[source])
+        target_path = Path(path_list[target])
+        add_edge(
+            stem_from_path(source_path, root),
+            stem_from_path(target_path, root),
+            'semantically_similar_to',
+            'INFERRED',
+            round(max(0.55, similarity), 2),
+            path_list[source],
+        )
 
     return edges
 
@@ -383,6 +445,8 @@ def run_extraction(
     directory: str,
     model_name: str = 'all-MiniLM-L6-v2',
     sim_threshold: float = 0.72,
+    max_similarity_neighbors: int = 20,
+    batch_size: int = 32,
     verbose: bool = True,
 ) -> dict:
     """
@@ -395,6 +459,7 @@ def run_extraction(
         raise FileNotFoundError(f'Directory not found: {root}')
 
     # Step 1: Discover files
+    started = time.perf_counter()
     if verbose:
         print(f'Scanning: {root}')
     files = detect_files(root)
@@ -409,7 +474,10 @@ def run_extraction(
     if verbose:
         print(f'Found {len(files)} readable files')
         for f in files:
-            print(f'  {f.relative_to(root)}')
+            if len(files) <= 100:
+                print(f'  {f.relative_to(root)}')
+        if len(files) > 100:
+            print('  file listing suppressed for large corpus')
 
     # Step 2: Read all text content
     if verbose:
@@ -458,19 +526,24 @@ def run_extraction(
         print('\nGenerating embeddings...')
     embeddings: dict[str, np.ndarray] = {}
     path_list = list(texts.keys())
-    for path_str in path_list:
-        body = texts[path_str]
-        if len(body) > 12000:
-            body = body[:12000]
-        emb = encoder.encode(body, show_progress_bar=False)
-        embeddings[path_str] = emb.astype(np.float32)
+    bodies = [texts[path][:12000] for path in path_list]
+    encoded = encoder.encode(
+        bodies,
+        batch_size=batch_size,
+        show_progress_bar=verbose,
+        convert_to_numpy=True,
+    )
+    for path_str, embedding in zip(path_list, encoded):
+        embeddings[path_str] = embedding.astype(np.float32)
 
     # Step 5: Keyword extraction via KeyBERT
     if verbose:
         print('Extracting keywords...')
     from keybert import KeyBERT
     kw_model = KeyBERT(model=encoder)
-    keywords_by_file = extract_keybert_keywords(kw_model, texts)
+    keywords_by_file = extract_keybert_keywords(
+        kw_model, texts, batch_size=batch_size
+    )
     total_kw = sum(len(v) for v in keywords_by_file.values())
     if verbose:
         print(f'  {total_kw} keywords extracted')
@@ -478,7 +551,7 @@ def run_extraction(
     # Step 6: NER via spaCy
     if verbose:
         print('Running named entity recognition...')
-    entities_by_file = extract_ner_entities(nlp, texts)
+    entities_by_file = extract_ner_entities(nlp, texts, batch_size=batch_size)
     total_ent = sum(len(v) for v in entities_by_file.values())
     if verbose:
         print(f'  {total_ent} entities extracted')
@@ -514,7 +587,8 @@ def run_extraction(
         print('Building edges...')
     edges = build_edges(files, root, embeddings,
                         keywords_by_file, entities_by_file, texts,
-                        sim_threshold=sim_threshold)
+                        sim_threshold=sim_threshold,
+                        max_similarity_neighbors=max_similarity_neighbors)
     edges.extend(structural_edges)
     if verbose:
         print(f'  {len(edges)} edges ({len(structural_edges)} structural)')
@@ -540,6 +614,7 @@ def run_extraction(
     if verbose:
         print(f'\nDone. {len(nodes)} nodes, {len(edges)} edges, '
               f'{len(hyperedges)} hyperedges')
+        print(f'Elapsed: {time.perf_counter() - started:.1f}s')
         print('Tokens used: 0 (all local computation)')
 
     return result

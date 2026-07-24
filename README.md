@@ -1,5 +1,7 @@
 # ASTify
 
+[日本語](README.ja.md)
+
 Tree-sitter AST + embedding knowledge graph extraction — zero AI tokens.
 
 Combines real code structure with local embeddings, keyword analysis, and named
@@ -28,6 +30,9 @@ Windows, macOS, Linux. CPU only — no GPU required.
 # Full pipeline: detect → extract → build → report → html
 astify /path/to/project
 
+# Explicit large-corpus controls (defaults shown)
+astify /path/to/project --max-neighbors 20 --batch-size 32
+
 # Step by step
 astify detect .
 astify extract .
@@ -49,14 +54,23 @@ Readable files (source code, XML, YAML, docs, PDFs, any text extension)
     │
     ├─► Tree-sitter AST (Apex, JS, TS/TSX) → symbols + EXTRACTED edges
     ├─► syntax fallback (other code) → HEURISTIC edges
-    ├─► sentence-transformers → embeddings → cosine similarity edges
+    ├─► sentence-transformers → batched embeddings → top-K similarity edges
     ├─► KeyBERT → keyword extraction → concept nodes
     ├─► spaCy NER → named entity nodes
     ├─► HDBSCAN → embedding clusters → hyperedges
-    └─► co-occurrence analysis → references edges
+    └─► canonical keyword/entity hubs → references edges
 
-Then: NetworkX graph → Louvain community detection → god nodes → report → HTML
+Then: projected NetworkX graph → Louvain communities → bounded bridge analysis
+      → report → size-safe HTML
 ```
+
+Similarity edges are capped per file. Shared keywords and entities become
+canonical hub nodes instead of file-to-file cliques. Small graphs use exact
+edge betweenness, medium graphs use sampled betweenness, and large graphs rank
+cross-community bridges without global shortest-path analysis.
+
+`--full-analysis`, `--full-json`, and `--full-html` force expensive outputs.
+Defaults remain bounded for repositories containing thousands of files.
 
 ## Output
 
@@ -100,12 +114,32 @@ prints a warning with the required commands.
 
 ```
 astify-out/
-├── .semantic.json    # raw extraction (Graphify-compatible)
-├── graph.json         # NetworkX node-link graph
+├── astify.db          # primary SQLite extraction + detailed query graph
+├── .semantic.json     # optional legacy extraction (`--json`)
+├── graph.json         # full graph below safe limits or with `--full-json`
+├── graph-summary.json # projected analysis/visualization graph
 ├── analysis.json      # communities, cohesion, gods, surprises
 ├── GRAPH_REPORT.md    # human-readable audit report
 └── graph.html         # interactive visualization
 ```
+
+Queries read `astify.db` automatically when a large build omits `graph.json`.
+Explicit `-o` and `--graphify-path` extraction exports remain JSON-compatible.
+
+## Large Corpus Guidance
+
+```bash
+# Standard bounded run
+astify . --max-neighbors 20 --batch-size 32
+
+# Lower-memory Windows/Defender/OneDrive workspace
+astify . --max-neighbors 10 --batch-size 16 --no-viz
+astify html .
+```
+
+Large HTML output automatically aggregates communities. Build logs show full
+and projected graph sizes plus `exact`, `sampled`, or `community_bridges`
+analysis mode.
 
 ## Comparison with Graphify LLM Extraction
 
@@ -114,8 +148,8 @@ astify-out/
 | `defines`, `calls`, `resolves_to`, `instantiates`, `assigns` | AST | Tree-sitter AST (`EXTRACTED`) |
 | Structural fallback | N/A | Syntax scan (`HEURISTIC`) |
 | `conceptually_related_to` | LLM | KeyBERT keywords |
-| `references` | LLM | spaCy NER + co-occurrence |
-| `semantically_similar_to` | LLM | Cosine similarity |
+| `references` | LLM | Canonical spaCy NER hubs |
+| `semantically_similar_to` | LLM | Top-K cosine similarity |
 | `implements`, `cites`, `rationale_for` | LLM | Not supported |
 | Hyperedges | LLM | HDBSCAN clusters |
 | Tokens per run | 50K-800K | **0** |
