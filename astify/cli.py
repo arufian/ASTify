@@ -119,8 +119,13 @@ def cmd_build(args):
 def cmd_query(args):
     from astify.query import query_graph
 
+    literal = 'auto'
+    if args.literal:
+        literal = 'always'
+    elif args.no_literal:
+        literal = 'never'
     query_graph(args.question, mode=args.mode, budget=args.budget,
-                directory=args.directory, quiet=args.quiet)
+                directory=args.directory, quiet=args.quiet, literal=literal)
 
 
 def cmd_path(args):
@@ -250,6 +255,10 @@ def main():
                    help='Traversal mode')
     p.add_argument('--budget', type=int, default=2000,
                    help='Output token budget')
+    p.add_argument('--literal', action='store_true',
+                   help='Always run the EXACT source scan for literal terms')
+    p.add_argument('--no-literal', action='store_true',
+                   help='Never run the EXACT source scan')
     p.add_argument('directory', nargs='?', default='.',
                    help='Directory with astify-out/')
     p.add_argument('-q', '--quiet', action='store_true')

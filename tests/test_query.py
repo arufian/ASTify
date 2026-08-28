@@ -8,6 +8,7 @@ from pathlib import Path
 import networkx as nx
 from networkx.readwrite import json_graph
 
+from astify.literal import literal_candidates, literal_search
 from astify.query import _expand_query_terms, _find_start_nodes, query_graph
 
 
@@ -150,6 +151,90 @@ class QueryTests(unittest.TestCase):
                 query_graph('ArtifactLink', directory=tempdir)
 
         self.assertIn('predates Tree-sitter symbol extraction', stdout.getvalue())
+
+
+class LiteralFallbackTests(unittest.TestCase):
+    def make_corpus(self, tempdir: str):
+        root = Path(tempdir)
+        (root / 'astify-out').mkdir()
+        graph = nx.Graph()
+        graph.graph.update({'schema_version': 2})
+        graph.add_node(
+            'file',
+            label='mappingSetting.html',
+            file_type='code',
+            source_file='ui/mappingSetting.html',
+        )
+        graph.add_node(
+            'concept',
+            label='mapping',
+            file_type='concept',
+        )
+        graph.add_edge('file', 'concept', relation='mentions',
+                       confidence='INFERRED')
+        data = json_graph.node_link_data(graph, edges='links')
+        (root / 'astify-out' / 'graph.json').write_text(
+            json.dumps(data), encoding='utf-8')
+        ui = root / 'ui'
+        ui.mkdir()
+        (ui / 'mappingSetting.html').write_text(
+            '<h1>見積項目マッピング設定</h1>\n'
+            '<input placeholder="konoformat1" />\n',
+            encoding='utf-8',
+        )
+        return root
+
+    def test_candidates_cover_cjk_and_identifier_literals(self):
+        terms = literal_candidates(
+            'in 見積項目マッピング設定: change the placeholder konoformat1'
+        )
+
+        self.assertIn('見積項目マッピング設定', terms)
+        self.assertIn('konoformat1', terms)
+        self.assertNotIn('placeholder', terms)
+
+    def test_literal_search_returns_file_and_line(self):
+        with tempfile.TemporaryDirectory() as tempdir:
+            root = self.make_corpus(tempdir)
+
+            hits = literal_search(root, ['konoformat1'])
+
+        self.assertEqual(len(hits), 1)
+        self.assertEqual(hits[0]['path'], 'ui/mappingSetting.html')
+        self.assertEqual(hits[0]['line'], 2)
+
+    def test_query_falls_back_to_exact_scan_when_only_inferred(self):
+        with tempfile.TemporaryDirectory() as tempdir:
+            self.make_corpus(tempdir)
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                query_graph('change the placeholder konoformat1 into format1',
+                            directory=tempdir)
+
+        output = stdout.getvalue()
+        self.assertIn('Literal matches [EXACT source scan]', output)
+        self.assertIn('ui/mappingSetting.html:2', output)
+
+    def test_cjk_question_without_vocab_match_still_locates_source(self):
+        with tempfile.TemporaryDirectory() as tempdir:
+            self.make_corpus(tempdir)
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                query_graph('見積項目マッピング設定 のタイトルを変更したい',
+                            directory=tempdir)
+
+        output = stdout.getvalue()
+        self.assertIn('ui/mappingSetting.html:1', output)
+
+    def test_no_literal_flag_suppresses_scan(self):
+        with tempfile.TemporaryDirectory() as tempdir:
+            self.make_corpus(tempdir)
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                query_graph('change the placeholder konoformat1',
+                            directory=tempdir, literal='never')
+
+        self.assertNotIn('EXACT source scan', stdout.getvalue())
 
 
 if __name__ == '__main__':

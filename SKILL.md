@@ -1,6 +1,6 @@
 ---
 name: ASTify
-description: "Use for codebase topic discovery and for symbol/call navigation when an ASTify schema-v2 graph exists. Tree-sitter provides exact Apex, JavaScript, TypeScript, and TSX structure; other code uses clearly labeled heuristic extraction, while metadata/docs use inferred local embeddings. Query once, then fall back promptly to source search when structural matches are absent. Supports extract, build, query, path, and explain."
+description: "Use for codebase topic discovery, for symbol/call navigation when an ASTify schema-v2 graph exists, and for locating literal strings (placeholder values, UI labels, Japanese/CJK text) — query runs an EXACT source scan automatically when the graph has no structural match. Tree-sitter provides exact Apex, JavaScript, TypeScript, and TSX structure; other code uses clearly labeled heuristic extraction, while metadata/docs use inferred local embeddings. Supports extract, build, query, path, and explain."
 ---
 
 # /astify
@@ -18,6 +18,8 @@ interactive HTML.
 /astify query "<question>"                           # BFS traversal — broad context
 /astify query "<question>" --dfs                     # DFS — trace a specific path
 /astify query "<question>" --budget 1500             # cap output at N tokens
+/astify query "konoformat1" --literal                # force EXACT file:line source scan
+/astify query "<question>" --no-literal              # graph only, skip the source scan
 /astify path "AuthModule" "Database"                 # shortest path between two concepts
 /astify explain "JWT"                                # plain-language explanation of a node
 /astify extract <path> --model all-MiniLM-L6-v2      # custom embedding model
@@ -41,8 +43,11 @@ run one query.
 
 - If query warns graph predates Tree-sitter schema v2, do not trust it for exact
   code navigation. Fall back to `rg` and recommend rebuilding.
-- If exact question returns no direct `symbol` matches or only `INFERRED`
-  concept edges, fall back immediately to `rg`/source reading.
+- If the question returns no direct `symbol` matches or only `INFERRED`
+  concept edges, query automatically runs an EXACT source scan for the literal
+  parts of the question (quoted strings, identifiers with digits/underscores/
+  CamelCase, CJK runs) and prints `path:line` hits. Use those, not the
+  `INFERRED` rows. Fall back to `rg` only when that scan also finds nothing.
 - Never present embedding similarity as proof of a definition, call, mutation,
   or exact source line.
 
@@ -165,8 +170,21 @@ Inspect output confidence:
 - `HEURISTIC`: useful lead, verify in source.
 - `INFERRED` concept-only result: coarse topic signal, not exact code evidence.
 
-For exact questions, fall back to `rg` after one inconclusive query. Do not spend
-multiple graph round trips trying to force an embedding result.
+- `LITERAL matches [EXACT source scan]`: real file content at `path:line`.
+  Safe to act on; it is the same evidence `rg` would give.
+
+Literal strings the graph cannot index — a placeholder value like
+`konoformat1`, a Japanese UI label like `見積項目マッピング設定`, a quoted
+message — are handled by the automatic source scan. Force it with `--literal`
+when you want file:line evidence alongside a graph answer:
+
+```bash
+astify query "change the placeholder konoformat1 into format1" --literal
+```
+
+Fall back to `rg` only if both the traversal and the literal scan come back
+empty. Do not spend multiple graph round trips trying to force an embedding
+result.
 
 For deep traversal:
 ```bash

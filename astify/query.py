@@ -180,12 +180,50 @@ def _edge_priority(edge: dict) -> tuple:
     )
 
 
+def _literal_report(root, question: str, quiet: bool = False) -> bool:
+    """Print EXACT source hits for literal parts of the question.
+
+    Returns whether anything was found. The graph indexes labels and symbols,
+    not file content, so literal strings (placeholders, UI labels, CJK phrases)
+    are invisible to traversal and need a source scan.
+    """
+    from astify.literal import literal_candidates, literal_search
+
+    terms = literal_candidates(question)
+    if not terms:
+        if not quiet:
+            print('No literal terms in question to scan for.')
+        return False
+    hits = literal_search(root, terms)
+    if not hits:
+        if not quiet:
+            print(f'Literal scan [EXACT] for {terms}: no source matches.')
+        return False
+    print(f'Literal matches [EXACT source scan] for {terms}:')
+    for hit in hits:
+        print(f'  {hit["path"]}:{hit["line"]}: {hit["text"]}')
+    return True
+
+
+def _has_structural_evidence(G, start_nodes, subgraph_edges) -> bool:
+    if any(G.nodes[nid].get('file_type') == 'symbol' for nid in start_nodes):
+        return True
+    return any(
+        G[u][v].get('confidence') in ('EXTRACTED', 'HEURISTIC')
+        and G[u][v].get('relation') in STRUCTURAL_RELATIONS
+        for u, v in subgraph_edges
+    )
+
+
 def query_graph(question: str, mode: str = 'bfs', budget: int = 2000,
-                directory: str = '.', quiet: bool = False):
+                directory: str = '.', quiet: bool = False,
+                literal: str = 'auto'):
     G, root = _load_graph(directory, question=question)
     matched = _expand_query_terms(G, question)
     if not matched:
         print('No vocabulary match. Available terms:', _build_vocab(G)[:20], '...')
+        if literal != 'never':
+            _literal_report(root, question, quiet=quiet)
         return
 
     if not quiet:
@@ -195,6 +233,8 @@ def query_graph(question: str, mode: str = 'bfs', budget: int = 2000,
 
     if not start_nodes:
         print('No matching nodes found.')
+        if literal != 'never':
+            _literal_report(root, question, quiet=quiet)
         return
 
     subgraph_nodes = set(start_nodes)
@@ -284,6 +324,15 @@ def query_graph(question: str, mode: str = 'bfs', budget: int = 2000,
         output = output[:char_budget] + \
                  f'\n... truncated at ~{budget} tokens'
     print(output)
+
+    if literal == 'always' or (
+        literal == 'auto'
+        and not _has_structural_evidence(G, start_nodes, subgraph_edges)
+    ):
+        if not quiet:
+            print()
+            print('Graph gave no exact structural match — scanning source text.')
+        _literal_report(root, question, quiet=quiet)
 
 
 def find_path(node_a: str, node_b: str, directory: str = '.',
